@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>EventVault'a Hoş Geldiniz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 EventVault'a Hoş Geldiniz!</h1>
+            <p>Etkinlik anılarınızı güvenle saklayın ve paylaşın</p>
+        </div>
+
+        <div class="content">
+            <h2>Merhaba {{ user.first_name }}!</h2>
+
+            <p>EventVault ailesine katıldığınız için teşekkür ederiz! Artık etkinliklerinizde çekilen fotoğraf, video ve ses dosyalarını kolayca toplayabilir ve sevdiklerinizle paylaşabilirsiniz.</p>
+
+            <h3>🚀 Hemen Başlayın:</h3>
+            <ul>
+                <li>İlk albümünüzü oluşturun</li>
+                <li>QR kod ile kolay paylaşım yapın</li>
+                <li>Davetlilerinizin anonim yükleme yapmasını sağlayın</li>
+                <li>Tüm anılarınızı güvenle saklayın</li>
+            </ul>
+
+            <div style="text-align: center;">
+                <a href="http://localhost:3000/dashboard" class="button">Dashboard'a Git</a>
+            </div>
+
+            <h3>📱 Özellikler:</h3>
+            <ul>
+                <li><strong>QR Kod Paylaşımı:</strong> Albümünüzü QR kod ile kolayca paylaşın</li>
+                <li><strong>Anonim Yükleme:</strong> Davetlileriniz kayıt olmadan dosya yükleyebilir</li>
+                <li><strong>Çoklu Medya Desteği:</strong> Fotoğraf, video, ses ve metin dosyaları</li>
+                <li><strong>Güvenli Saklama:</strong> Dosyalarınız güvenle saklanır</li>
+                <li><strong>Kolay Yönetim:</strong> Kullanıcı dostu arayüz</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Bu e-posta EventVault tarafından gönderilmiştir.</p>
+            <p>E-posta almak istemiyorsanız <a href="#">buradan</a> aboneliğinizi iptal edebilirsiniz.</p>
+        </div>
+    </div>
+</body>
+
+</html>

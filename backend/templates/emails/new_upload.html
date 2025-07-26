@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Yeni Dosya Yüklendi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .upload-info {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Yeni Dosya Yüklendi!</h1>
+            <p>{{ album.title }} albümünüze yeni bir dosya eklendi</p>
+        </div>
+
+        <div class="content">
+            <h2>Merhaba {{ user.first_name }}!</h2>
+
+            <p><strong>{{ album.title }}</strong> albümünüze yeni bir dosya yüklendi.</p>
+
+            <div class="upload-info">
+                <h3>📁 Yüklenen Dosya:</h3>
+                <p><strong>Dosya Adı:</strong> {{ upload.original_filename }}</p>
+                <p><strong>Dosya Türü:</strong> {{ upload.file_type }}</p>
+                <p><strong>Boyut:</strong> {{ upload.file_size_mb }} MB</p>
+                {% if upload.uploader_name %}
+                <p><strong>Yükleyen:</strong> {{ upload.uploader_name }}</p>
+                {% endif %} {% if upload.message %}
+                <p><strong>Mesaj:</strong> {{ upload.message }}</p>
+                {% endif %}
+                <p><strong>Yükleme Tarihi:</strong> {{ upload.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="http://localhost:3000/album/{{ album.id }}" class="button">Albümü Görüntüle</a>
+            </div>
+
+            <h3>📊 Albüm İstatistikleri:</h3>
+            <ul>
+                <li>Toplam Dosya: {{ album.total_uploads }}</li>
+                <li>Toplam Boyut: {{ album.total_size_mb }} MB</li>
+                <li>Son Güncelleme: {{ album.updated_at|date:"d.m.Y H:i" }}</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Bu e-posta EventVault tarafından gönderilmiştir.</p>
+            <p>Bildirimleri kapatmak için <a href="#">buradan</a> ayarlarınızı değiştirebilirsiniz.</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+EventVault'a Hoş Geldiniz! 🎉
+
+Merhaba {{ user.first_name }}!
+
+EventVault ailesine katıldığınız için teşekkür ederiz! Artık etkinliklerinizde çekilen fotoğraf, video ve ses dosyalarını kolayca toplayabilir ve sevdiklerinizle paylaşabilirsiniz.
+
+🚀 Hemen Başlayın:
+- İlk albümünüzü oluşturun
+- QR kod ile kolay paylaşım yapın
+- Davetlilerinizin anonim yükleme yapmasını sağlayın
+- Tüm anılarınızı güvenle saklayın
+
+Dashboard'a gitmek için: http://localhost:3000/dashboard
+
+📱 Özellikler:
+- QR Kod Paylaşımı: Albümünüzü QR kod ile kolayca paylaşın
+- Anonim Yükleme: Davetlileriniz kayıt olmadan dosya yükleyebilir
+- Çoklu Medya Desteği: Fotoğraf, video, ses ve metin dosyaları
+- Güvenli Saklama: Dosyalarınız güvenle saklanır
+- Kolay Yönetim: Kullanıcı dostu arayüz
+
+Bu e-posta EventVault tarafından gönderilmiştir.
+E-posta almak istemiyorsanız aboneliğinizi iptal edebilirsiniz. 
