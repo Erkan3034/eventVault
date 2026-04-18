@@ -112,3 +112,7 @@ npm start
 ## 📄 Lisans
 
 Bu proje MIT lisansı altında lisanslanmıştır. 
+
+## Geliştiriciler 
+- [Erkan TURGUT](https://github.com/Erkan3034)
+- [Aslı AYDIN](https://github.com/asliaydin0)
