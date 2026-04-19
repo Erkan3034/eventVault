@@ -6,17 +6,17 @@ import { toast } from 'react-toastify';
 const LoginPage = () => {
     const [formData, setFormData] = useState({
         email: '',
-        password: ''
+        password: '',
     });
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        setFormData((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }));
     };
 
     const handleSubmit = async(e) => {

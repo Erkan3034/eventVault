@@ -1,6 +1,6 @@
-# EventVault - Etkinlik Bazlı Dijital Albümler Platformu
+# Mirra - Etkinlik Bazlı Dijital Albümler Platformu
 
-EventVault, kullanıcıların özel etkinliklerinde (düğün, nişan, mezuniyet, parti vb.) çekilen fotoğraf, video, ses ve yazılı mesajların belirli bir albüme QR kod aracılığıyla yüklenmesini sağlayan bir platformdur.
+Mirra, kullanıcıların özel etkinliklerinde (düğün, nişan, mezuniyet, parti vb.) çekilen fotoğraf, video, ses ve yazılı mesajların belirli bir albüme QR kod aracılığıyla yüklenmesini sağlayan bir platformdur.
 
 ## 🚀 Özellikler
 
@@ -35,7 +35,7 @@ EventVault, kullanıcıların özel etkinliklerinde (düğün, nişan, mezuniyet
 ```
 wedding-memories/
 ├── backend/                 # Django Rest Framework backend
-│   ├── eventvault/         # Main Django project
+│   ├── mirra/         # Main Django project
 │   ├── apps/               # Django apps
 │   ├── requirements.txt    # Python dependencies
 │   └── manage.py

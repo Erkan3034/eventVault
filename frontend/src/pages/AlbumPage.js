@@ -12,6 +12,7 @@ const AlbumPage = () => {
     useEffect(() => {
         fetchAlbum();
         fetchUploads();
+        // eslint-disable-next-line
     }, [id]);
 
     const fetchAlbum = async() => {
@@ -37,11 +38,19 @@ const AlbumPage = () => {
     };
 
     if (loading) {
-        return <div className = "min-h-screen flex items-center justify-center" > Yükleniyor... < /div>;
+        return ( <
+            div className = "min-h-screen flex items-center justify-center" >
+            Yükleniyor... <
+            /div>
+        );
     }
 
     if (!album) {
-        return <div className = "min-h-screen flex items-center justify-center text-red-600" > Albüm bulunamadı. < /div>;
+        return ( <
+            div className = "min-h-screen flex items-center justify-center text-red-600" >
+            Albüm bulunamadı. <
+            /div>
+        );
     }
 
     return ( <

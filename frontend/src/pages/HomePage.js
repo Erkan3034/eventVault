@@ -7,7 +7,7 @@ import {
     CloudArrowUpIcon,
     HeartIcon,
     UsersIcon,
-    ShieldCheckIcon
+    ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const HomePage = () => {
@@ -16,33 +16,33 @@ const HomePage = () => {
     const features = [{
             icon: QrCodeIcon,
             title: 'QR Kod ile Kolay Paylaşım',
-            description: 'Albümünüz için özel QR kod oluşturun ve misafirlerinizle kolayca paylaşın.'
+            description: 'Albümünüz için özel QR kod oluşturun ve misafirlerinizle kolayca paylaşın.',
         },
         {
             icon: CloudArrowUpIcon,
             title: 'Anonim Dosya Yükleme',
-            description: 'Misafirleriniz kayıt olmadan fotoğraf, video ve ses dosyalarını yükleyebilir.'
+            description: 'Misafirleriniz kayıt olmadan fotoğraf, video ve ses dosyalarını yükleyebilir.',
         },
         {
             icon: ShieldCheckIcon,
             title: 'Güvenli ve Özel',
-            description: 'Albümleriniz şifre korumalı ve sadece sizin kontrolünüzde.'
+            description: 'Albümleriniz şifre korumalı ve sadece sizin kontrolünüzde.',
         },
         {
             icon: UsersIcon,
             title: 'İşbirlikçi Yönetim',
-            description: 'Aileniz ve arkadaşlarınızla albüm yönetimini paylaşın.'
+            description: 'Aileniz ve arkadaşlarınızla albüm yönetimini paylaşın.',
         },
         {
             icon: HeartIcon,
             title: 'Beğeni ve Yorumlar',
-            description: 'Yüklenen içerikler için beğeni ve yorum sistemi.'
+            description: 'Yüklenen içerikler için beğeni ve yorum sistemi.',
         },
         {
             icon: CameraIcon,
             title: 'Çoklu Medya Desteği',
-            description: 'Fotoğraf, video, ses ve metin mesajları desteklenir.'
-        }
+            description: 'Fotoğraf, video, ses ve metin mesajları desteklenir.',
+        },
     ];
 
     const eventTypes = [
@@ -51,21 +51,24 @@ const HomePage = () => {
         { name: 'Mezuniyet', color: 'bg-blue-500', icon: '🎓' },
         { name: 'Nişan', color: 'bg-purple-500', icon: '💍' },
         { name: 'Yıldönümü', color: 'bg-red-500', icon: '💕' },
-        { name: 'Baby Shower', color: 'bg-green-500', icon: '👶' }
+        { name: 'Baby Shower', color: 'bg-green-500', icon: '👶' },
     ];
 
     return ( <
         div className = "min-h-screen" > { /* Hero Section */ } <
         section className = "relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white" >
         <
-        div className = "absolute inset-0 bg-black opacity-20" > < /div> <
+        div className = "absolute inset-0 bg-black opacity-20" / >
+        <
         div className = "relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24" >
         <
         div className = "text-center" >
         <
         h1 className = "text-4xl md:text-6xl font-bold mb-6" >
-        Etkinlik Anılarınızı <
-        span className = "block text-yellow-300" > Dijital Albümde Toplayın < /span> <
+        Etkinlik Anılarınızı { ' ' } <
+        span className = "block text-yellow-300" >
+        Dijital Albümde Toplayın <
+        /span> <
         /h1> <
         p className = "text-xl md:text-2xl mb-8 max-w-3xl mx-auto" >
         QR kod ile misafirlerinizin fotoğraf, video ve ses dosyalarını kolayca toplayın.Düğün, doğum günü, mezuniyet ve daha fazlası için. <
@@ -124,8 +127,7 @@ const HomePage = () => {
                 /div> <
                 h3 className = "text-xl font-semibold text-gray-900 mb-4" > { feature.title } <
                 /h3> <
-                p className = "text-gray-600" > { feature.description } <
-                /p> <
+                p className = "text-gray-600" > { feature.description } < /p> <
                 /div>
             ))
         } <
@@ -240,7 +242,7 @@ const HomePage = () => {
         p className = "text-xl mb-8 max-w-2xl mx-auto" >
         Etkinlik anılarınızı dijital albümde toplamaya başlayın.Ücretsiz hesap oluşturun ve ilk albümünüzü hemen oluşturun. <
         /p> <
-        Link to = { isAuthenticated ? "/create-album" : "/register" }
+        Link to = { isAuthenticated ? '/create-album' : '/register' }
         className = "bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors inline-block" >
         { isAuthenticated ? 'Albüm Oluştur' : 'Ücretsiz Başla' } <
         /Link> <

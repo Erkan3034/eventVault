@@ -11,7 +11,7 @@ User = get_user_model()
 
 class EventType(models.Model):
     """
-    Types of events (Wedding, Birthday, Graduation, etc.)
+    Types of events supported by Mirra (Wedding, Birthday, Graduation, etc.)
     """
     name = models.CharField(_('name'), max_length=100, unique=True)
     name_tr = models.CharField(_('turkish name'), max_length=100)
@@ -42,7 +42,8 @@ class EventType(models.Model):
 
 class Album(models.Model):
     """
-    Main album model for events
+    Main album model for Mirra events.
+    Each album has a unique QR access code and auto-generated WebP QR image.
     """
     STATUS_CHOICES = [
         ('draft', _('Draft')),
@@ -124,7 +125,8 @@ class Album(models.Model):
         
         # Set default allowed file types if empty
         if not self.allowed_file_types:
-            self.allowed_file_types = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'mp3', 'wav']
+            # Mirra always stores images as WebP; original ext types still accepted at upload
+            self.allowed_file_types = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'mp4', 'mov', 'avi', 'webm', 'mp3', 'wav', 'aac', 'm4a']
         
         super().save(*args, **kwargs)
         
@@ -151,29 +153,34 @@ class Album(models.Model):
             border=4,
         )
         
-        # QR code will contain the upload URL
-        upload_url = f"https://eventvault.com/upload/{self.access_code}"
+        # QR code points to the Mirra guest upload page
+        from django.conf import settings
+        app_url = getattr(settings, 'MIRRA_APP_URL', 'https://mirra.com.tr')
+        upload_url = f"{app_url}/y/{self.access_code}"
         qr.add_data(upload_url)
         qr.make(fit=True)
 
-        qr_image = qr.make_image(fill_color="black", back_color="white")
-        
-        # Save QR code image
+        qr_image = qr.make_image(fill_color="#1A2340", back_color="#FDF8F0")
+
+        # Save QR code as WebP for smallest file size
         buffer = BytesIO()
-        qr_image.save(buffer, format='PNG')
+        pil_img = qr_image.convert('RGB') if hasattr(qr_image, 'convert') else qr_image.get_image()
+        pil_img.save(buffer, format='WEBP', quality=90)
         buffer.seek(0)
-        
-        filename = f"qr_code_{self.access_code}.png"
+
+        filename = f"qr_code_{self.access_code}.webp"
         self.qr_code.save(filename, File(buffer), save=False)
         buffer.close()
-        
-        # Save without triggering save() again
-        Album.objects.filter(pk=self.pk).update(qr_code=self.qr_code)
+
+        # Update only qr_code column — avoid re-triggering full save()
+        Album.objects.filter(pk=self.pk).update(qr_code=self.qr_code.name)
 
     @property
-    def upload_url(self):
-        """Get the upload URL for this album"""
-        return f"/upload/{self.access_code}/"
+    def upload_url(self) -> str:
+        """Guest upload URL (short form used in QR code)."""
+        from django.conf import settings
+        app_url = getattr(settings, 'MIRRA_APP_URL', '')
+        return f"{app_url}/y/{self.access_code}"
 
     @property
     def total_uploads(self):
@@ -242,7 +249,7 @@ class AlbumCollaborator(models.Model):
 
 class AlbumSettings(models.Model):
     """
-    Additional settings for albums
+    Additional customisation settings for a Mirra album (cover image, welcome message, etc.).
     """
     album = models.OneToOneField(
         Album, 

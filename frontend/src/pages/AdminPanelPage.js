@@ -9,6 +9,7 @@ const AdminPanelPage = () => {
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line
     }, []);
 
     const fetchData = async() => {
@@ -32,13 +33,19 @@ const AdminPanelPage = () => {
     };
 
     if (loading) {
-        return <div className = "min-h-screen flex items-center justify-center" > Yükleniyor... < /div>;
+        return ( <
+            div className = "min-h-screen flex items-center justify-center" >
+            Yükleniyor... <
+            /div>
+        );
     }
 
     return ( <
         div className = "max-w-5xl mx-auto py-12" >
         <
-        h2 className = "text-2xl font-bold mb-8" > Admin Paneli < /h2> <
+        h2 className = "text-2xl font-bold mb-8" > Admin Paneli < /h2>
+
+        <
         div className = "mb-8" >
         <
         h3 className = "text-lg font-semibold mb-2" > Albümler < /h3> <
@@ -66,7 +73,9 @@ const AdminPanelPage = () => {
         } <
         /tbody> <
         /table> <
-        /div> <
+        /div>
+
+        <
         div className = "mb-8" >
         <
         h3 className = "text-lg font-semibold mb-2" > Kullanıcılar < /h3> <
@@ -92,7 +101,9 @@ const AdminPanelPage = () => {
         } <
         /tbody> <
         /table> <
-        /div> <
+        /div>
+
+        <
         div >
         <
         h3 className = "text-lg font-semibold mb-2" > Raporlanan İçerikler < /h3> <

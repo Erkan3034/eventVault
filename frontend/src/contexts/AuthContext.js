@@ -8,7 +8,7 @@ const initialState = {
     token: localStorage.getItem('token'),
     isAuthenticated: false,
     loading: true,
-    error: null
+    error: null,
 };
 
 const authReducer = (state, action) => {
@@ -17,7 +17,7 @@ const authReducer = (state, action) => {
             return {
                 ...state,
                 loading: true,
-                error: null
+                error: null,
             };
         case 'LOGIN_SUCCESS':
             return {
@@ -26,7 +26,7 @@ const authReducer = (state, action) => {
                 token: action.payload.token,
                 isAuthenticated: true,
                 loading: false,
-                error: null
+                error: null,
             };
         case 'LOGIN_FAILURE':
             return {
@@ -35,7 +35,7 @@ const authReducer = (state, action) => {
                 token: null,
                 isAuthenticated: false,
                 loading: false,
-                error: action.payload
+                error: action.payload,
             };
         case 'LOGOUT':
             return {
@@ -44,17 +44,17 @@ const authReducer = (state, action) => {
                 token: null,
                 isAuthenticated: false,
                 loading: false,
-                error: null
+                error: null,
             };
         case 'UPDATE_USER':
             return {
                 ...state,
-                user: action.payload
+                user: action.payload,
             };
         case 'CLEAR_ERROR':
             return {
                 ...state,
-                error: null
+                error: null,
             };
         default:
             return state;
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
                     const response = await axios.get('/api/v1/auth/profile/');
                     dispatch({
                         type: 'LOGIN_SUCCESS',
-                        payload: { user: response.data, token: state.token }
+                        payload: { user: response.data, token: state.token },
                     });
                 } catch (error) {
                     dispatch({ type: 'LOGOUT' });
@@ -103,25 +103,27 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await axios.post('/api/v1/auth/login/', {
                 email,
-                password
+                password,
             });
 
             dispatch({
                 type: 'LOGIN_SUCCESS',
                 payload: {
                     user: response.data.user,
-                    token: response.data.access
-                }
+                    token: response.data.access,
+                },
             });
 
             return { success: true };
         } catch (error) {
             const errorMessage =
-                (error.response && (error.response.data && (error.response.data.message || error.response.data.detail))) ||
+                (error.response &&
+                    error.response.data &&
+                    (error.response.data.message || error.response.data.detail)) ||
                 'Giriş başarısız';
             dispatch({
                 type: 'LOGIN_FAILURE',
-                payload: errorMessage
+                payload: errorMessage,
             });
             return { success: false, error: errorMessage };
         }
@@ -137,18 +139,20 @@ export const AuthProvider = ({ children }) => {
                 type: 'LOGIN_SUCCESS',
                 payload: {
                     user: response.data.user,
-                    token: response.data.access
-                }
+                    token: response.data.access,
+                },
             });
 
             return { success: true };
         } catch (error) {
             const errorMessage =
-                (error.response && (error.response.data && (error.response.data.message || error.response.data.detail))) ||
+                (error.response &&
+                    error.response.data &&
+                    (error.response.data.message || error.response.data.detail)) ||
                 'Kayıt başarısız';
             dispatch({
                 type: 'LOGIN_FAILURE',
-                payload: errorMessage
+                payload: errorMessage,
             });
             return { success: false, error: errorMessage };
         }
@@ -158,10 +162,11 @@ export const AuthProvider = ({ children }) => {
         try {
             if (state.token) {
                 await axios.post('/api/v1/auth/logout/', {
-                    refresh: state.token
+                    refresh: state.token,
                 });
             }
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Logout error:', error);
         } finally {
             dispatch({ type: 'LOGOUT' });
@@ -173,12 +178,14 @@ export const AuthProvider = ({ children }) => {
             const response = await axios.patch('/api/v1/auth/profile/update/', profileData);
             dispatch({
                 type: 'UPDATE_USER',
-                payload: response.data
+                payload: response.data,
             });
             return { success: true };
         } catch (error) {
             const errorMessage =
-                (error.response && (error.response.data && (error.response.data.message || error.response.data.detail))) ||
+                (error.response &&
+                    error.response.data &&
+                    (error.response.data.message || error.response.data.detail)) ||
                 'Profil güncellenemedi';
             return { success: false, error: errorMessage };
         }
@@ -190,7 +197,9 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             const errorMessage =
-                (error.response && (error.response.data && (error.response.data.message || error.response.data.detail))) ||
+                (error.response &&
+                    error.response.data &&
+                    (error.response.data.message || error.response.data.detail)) ||
                 'Şifre değiştirilemedi';
             return { success: false, error: errorMessage };
         }
@@ -207,7 +216,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         changePassword,
-        clearError
+        clearError,
     };
 
     return ( <
@@ -218,7 +227,7 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (!context) {
+    if (context === undefined) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;

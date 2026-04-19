@@ -10,16 +10,20 @@ const CreateAlbumPage = () => {
         event_type_id: '',
         event_date: '',
         event_location: '',
-        privacy: 'private',
+        privacy: 'private', // Default to 'private'
         description: ''
     });
     const [eventTypes, setEventTypes] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Initial loading state for fetching event types
     const [album, setAlbum] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchEventTypes();
+        const initializePage = async() => {
+            await fetchEventTypes();
+            setLoading(false); // Set loading to false after event types are fetched
+        };
+        initializePage();
     }, []);
 
     const fetchEventTypes = async() => {
@@ -27,7 +31,9 @@ const CreateAlbumPage = () => {
             const res = await axios.get('/api/v1/albums/event-types/');
             setEventTypes(res.data);
         } catch (err) {
-            setEventTypes([]);
+            console.error('Error fetching event types:', err);
+            toast.error('Etkinlik türleri yüklenirken bir hata oluştu.');
+            setEventTypes([]); // Ensure eventTypes is an empty array on error
         }
     };
 
@@ -37,66 +43,95 @@ const CreateAlbumPage = () => {
 
     const handleSubmit = async(e) => {
         e.preventDefault();
-        setLoading(true);
+        setLoading(true); // Set loading for form submission
         try {
             const res = await axios.post('/api/v1/albums/', form);
             setAlbum(res.data);
             toast.success('Albüm başarıyla oluşturuldu!');
         } catch (err) {
-            toast.error('Albüm oluşturulamadı.');
+            console.error('Error creating album:', err); // Log the full error for debugging
+            // Display a more specific error message if available from the API
+            const errorMessage = err.response ? .data ? .message || 'Albüm oluşturulamadı. Lütfen tekrar deneyin.';
+            toast.error(errorMessage);
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
+    // Get today's date in YYYY-MM-DD format for the min attribute of the date input
+    const today = new Date().toISOString().split('T')[0];
+
+    // Show loading spinner while fetching event types initially
+    if (loading && !album) {
+        return ( <
+            div className = "min-h-screen bg-gray-50 flex items-center justify-center" >
+            <
+            div className = "animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600" > < /div> <
+            /div>
+        );
+    }
+
     if (album) {
         return ( <
-            div className = "max-w-xl mx-auto py-12" >
+            div className = "max-w-xl mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg" >
             <
-            h2 className = "text-2xl font-bold mb-4" > Albüm Oluşturuldu! < /h2> <
-            p className = "mb-4" > QR kodu davetlilerinizle paylaşabilirsiniz: < /p> <
-            div className = "flex flex-col items-center mb-6" >
+            h2 className = "text-2xl font-bold mb-4 text-center text-gray-900" > Albüm Oluşturuldu! < /h2> <
+            p className = "mb-6 text-center text-gray-700" > QR kodu davetlilerinizle paylaşabilir veya albüme gidebilirsiniz: < /p> <
+            div className = "flex flex-col items-center mb-6 p-4 border border-gray-200 rounded-md bg-gray-50" >
             <
             QRCode value = { window.location.origin + '/upload/' + album.access_code }
             size = { 200 }
-            /> <
-            p className = "mt-4 text-sm text-gray-600 break-all" > { window.location.origin + '/upload/' + album.access_code } <
+            level = "H" // High error correction for better scannability
+            className = "p-2 bg-white rounded-md shadow" /
+            >
+            <
+            p className = "mt-4 text-sm text-gray-600 break-all text-center" >
+            <
+            span className = "font-medium" > Yükleme Bağlantısı: < /span> <br / > { window.location.origin }
+            /upload/ { album.access_code } <
             /p> <
             /div> <
-            button className = "bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700"
+            div className = "flex justify-center" >
+            <
+            button className = "bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick = {
                 () => navigate(`/album/${album.id}`) } >
             Albüme Git <
             /button> <
+            /div> <
             /div>
         );
     }
 
     return ( <
-        div className = "max-w-xl mx-auto py-12" >
+        div className = "max-w-xl mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg" >
         <
-        h2 className = "text-2xl font-bold mb-6" > Yeni Albüm Oluştur < /h2> <
+        h2 className = "text-2xl font-bold mb-6 text-center text-gray-900" > Yeni Albüm Oluştur < /h2> <
         form className = "space-y-6"
         onSubmit = { handleSubmit } >
         <
         div >
         <
-        label className = "block text-sm font-medium text-gray-700" > Albüm Başlığı < /label> <
+        label htmlFor = "title"
+        className = "block text-sm font-medium text-gray-700" > Albüm Başlığı < /label> <
         input type = "text"
+        id = "title"
         name = "title"
         value = { form.title }
         onChange = { handleChange }
-        required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
+        required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" /
         >
         <
         /div> <
         div >
         <
-        label className = "block text-sm font-medium text-gray-700" > Etkinlik Türü < /label> <
-        select name = "event_type_id"
+        label htmlFor = "event_type_id"
+        className = "block text-sm font-medium text-gray-700" > Etkinlik Türü < /label> <
+        select id = "event_type_id"
+        name = "event_type_id"
         value = { form.event_type_id }
         onChange = { handleChange }
-        required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" >
+        required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" >
         <
         option value = "" > Seçiniz < /option> {
             eventTypes.map((et) => ( <
@@ -108,52 +143,59 @@ const CreateAlbumPage = () => {
         /div> <
         div >
         <
-        label className = "block text-sm font-medium text-gray-700" > Etkinlik Tarihi < /label> <
+        label htmlFor = "event_date"
+        className = "block text-sm font-medium text-gray-700" > Etkinlik Tarihi < /label> <
         input type = "date"
+        id = "event_date"
         name = "event_date"
         value = { form.event_date }
         onChange = { handleChange }
-        required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
-        >
+        min = { today } // Set minimum date to today
+        required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" / >
         <
         /div> <
         div >
         <
-        label className = "block text-sm font-medium text-gray-700" > Etkinlik Lokasyonu < /label> <
+        label htmlFor = "event_location"
+        className = "block text-sm font-medium text-gray-700" > Etkinlik Lokasyonu < /label> <
         input type = "text"
+        id = "event_location"
         name = "event_location"
         value = { form.event_location }
         onChange = { handleChange }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
-        >
+        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" / >
         <
         /div> <
         div >
         <
-        label className = "block text-sm font-medium text-gray-700" > Açıklama < /label> <
-        textarea name = "description"
+        label htmlFor = "description"
+        className = "block text-sm font-medium text-gray-700" > Açıklama < /label> <
+        textarea id = "description"
+        name = "description"
         value = { form.description }
         onChange = { handleChange }
         rows = { 3 }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
+        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" /
         >
         <
         /div> <
         div >
         <
-        label className = "block text-sm font-medium text-gray-700" > Gizlilik < /label> <
-        select name = "privacy"
+        label htmlFor = "privacy"
+        className = "block text-sm font-medium text-gray-700" > Gizlilik < /label> <
+        select id = "privacy"
+        name = "privacy"
         value = { form.privacy }
         onChange = { handleChange }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" >
+        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" >
         <
         option value = "private" > Özel < /option> <
         option value = "public" > Herkese Açık < /option> <
         /select> <
         /div> <
         button type = "submit"
-        disabled = { loading }
-        className = "w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50" >
+        disabled = { loading } // Disable during both initial data fetch and form submission
+        className = "w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" >
         { loading ? 'Oluşturuluyor...' : 'Albüm Oluştur' } <
         /button> <
         /form> <

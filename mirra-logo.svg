@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="680" height="420" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mirra Logo">
+  <title>Mirra — Her Anın Evi</title>
+  <desc>Mirra etkinlik albüm platformu logosu. Gece mavisi ve antik altın renk paleti.</desc>
+
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&amp;family=DM+Sans:wght@300&amp;display=swap');
+      .m-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-weight: 300;
+        font-size: 86px;
+        letter-spacing: 18px;
+        fill: #1A2340;
+      }
+      .m-sub {
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-weight: 300;
+        font-size: 12px;
+        letter-spacing: 6px;
+        fill: #8A6E3A;
+      }
+      .m-tag {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: 17px;
+        letter-spacing: 2px;
+        fill: #8A6E3A;
+      }
+    </style>
+  </defs>
+
+  <!-- background transparent by default — add rect below if needed -->
+
+  <!-- top rule -->
+  <line x1="200" y1="52" x2="480" y2="52" stroke="#B8975A" stroke-width="0.5"/>
+
+  <!-- mirror icon -->
+  <ellipse cx="340" cy="118" rx="54" ry="64" fill="none" stroke="#B8975A" stroke-width="1"/>
+  <ellipse cx="340" cy="118" rx="46" ry="56" fill="#FDF8F0" stroke="none"/>
+  <line x1="294" y1="118" x2="386" y2="118" stroke="#B8975A" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <circle cx="340" cy="118" r="3" fill="#B8975A"/>
+  <circle cx="340" cy="57"  r="2" fill="#B8975A"/>
+  <circle cx="340" cy="179" r="2" fill="#B8975A"/>
+
+  <!-- wordmark -->
+  <text class="m-title" x="340" y="270" text-anchor="middle">mirra</text>
+
+  <!-- divider -->
+  <line x1="240" y1="288" x2="440" y2="288" stroke="#B8975A" stroke-width="0.5"/>
+
+  <!-- sub label -->
+  <text class="m-sub" x="340" y="308" text-anchor="middle">ETKİNLİK ALBÜM PLATFORMU</text>
+
+  <!-- tagline -->
+  <text class="m-tag" x="340" y="345" text-anchor="middle">her anın evi</text>
+
+  <!-- bottom rule -->
+  <line x1="200" y1="368" x2="480" y2="368" stroke="#B8975A" stroke-width="0.5"/>
+
+  <!-- corner flourishes -->
+  <path d="M148 52 L148 72 M148 52 L168 52" fill="none" stroke="#D4B07A" stroke-width="0.8"/>
+  <path d="M532 52 L532 72 M532 52 L512 52" fill="none" stroke="#D4B07A" stroke-width="0.8"/>
+  <path d="M148 368 L148 348 M148 368 L168 368" fill="none" stroke="#D4B07A" stroke-width="0.8"/>
+  <path d="M532 368 L532 348 M532 368 L512 368" fill="none" stroke="#D4B07A" stroke-width="0.8"/>
+</svg>

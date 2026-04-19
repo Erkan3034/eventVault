@@ -1,29 +1,42 @@
+"""
+Upload models for Mirra.
+All images are auto-converted to WebP (quality=82) on save.
+All thumbnails are WebP (quality=80).
+EXIF metadata is stripped for privacy.
+"""
+
 import uuid
 import os
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from PIL import Image
 from apps.albums.models import Album
 
 User = get_user_model()
 
 
 def upload_path(instance, filename):
-    """Generate upload path for files"""
-    # Get file extension
-    ext = filename.split('.')[-1].lower()
-    # Generate new filename with UUID
+    """
+    Generate upload path for files.
+    Extension is always .webp for images; original ext preserved for video/audio.
+    Path: uploads/{album_access_code}/{uuid}.{ext}
+    """
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else 'bin'
     new_filename = f"{uuid.uuid4()}.{ext}"
-    # Create path: uploads/album_access_code/new_filename
     return f"uploads/{instance.album.access_code}/{new_filename}"
+
+
+def thumbnail_path(instance, filename):
+    return f"thumbnails/{instance.album.access_code}/{filename}"
 
 
 class Upload(models.Model):
     """
-    File uploads to albums
+    File uploads to Mirra albums.
+    Images are always stored as WebP after processing.
     """
+
     FILE_TYPES = [
         ('image', _('Image')),
         ('video', _('Video')),
@@ -39,51 +52,56 @@ class Upload(models.Model):
         ('processing', _('Processing')),
     ]
 
-    # Basic Information
+    # ── Identity ──────────────────────────────────────────────
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     album = models.ForeignKey(
-        Album, 
-        on_delete=models.CASCADE, 
+        Album,
+        on_delete=models.CASCADE,
         related_name='uploads',
-        verbose_name=_('album')
+        verbose_name=_('album'),
     )
-    
-    # File Information
+
+    # ── File ─────────────────────────────────────────────────
     file = models.FileField(_('file'), upload_to=upload_path)
     original_filename = models.CharField(_('original filename'), max_length=255)
     file_type = models.CharField(_('file type'), max_length=20, choices=FILE_TYPES)
     file_size = models.PositiveIntegerField(_('file size (bytes)'), default=0)
     mime_type = models.CharField(_('MIME type'), max_length=100, blank=True)
-    
-    # Media-specific Information
-    thumbnail = models.ImageField(_('thumbnail'), upload_to='thumbnails/', blank=True, null=True)
+    file_hash = models.CharField(_('SHA-256 hash'), max_length=64, blank=True)
+
+    # ── Media metadata ────────────────────────────────────────
+    thumbnail = models.ImageField(
+        _('thumbnail'), upload_to=thumbnail_path, blank=True, null=True
+    )
     width = models.PositiveIntegerField(_('width'), null=True, blank=True)
     height = models.PositiveIntegerField(_('height'), null=True, blank=True)
     duration = models.FloatField(_('duration (seconds)'), null=True, blank=True)
-    
-    # Upload Information
+
+    # ── Uploader ──────────────────────────────────────────────
     uploader_name = models.CharField(_('uploader name'), max_length=100, blank=True)
     uploader_email = models.EmailField(_('uploader email'), blank=True)
     uploader_phone = models.CharField(_('uploader phone'), max_length=20, blank=True)
     uploader_user = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='uploads',
-        verbose_name=_('uploader user')
+        verbose_name=_('uploader user'),
     )
-    
-    # Content
+
+    # ── Content ───────────────────────────────────────────────
     caption = models.TextField(_('caption'), blank=True)
     message = models.TextField(_('message'), blank=True)
-    
-    # Metadata
-    exif_data = models.JSONField(_('EXIF data'), default=dict, blank=True)
+
+    # ── Metadata ──────────────────────────────────────────────
     location_data = models.JSONField(_('location data'), default=dict, blank=True)
-    
-    # Moderation
-    status = models.CharField(_('status'), max_length=20, choices=STATUS_CHOICES, default='approved')
+    # Note: EXIF is intentionally NOT stored — stripped for user privacy.
+
+    # ── Moderation ────────────────────────────────────────────
+    status = models.CharField(
+        _('status'), max_length=20, choices=STATUS_CHOICES, default='approved'
+    )
     moderation_note = models.TextField(_('moderation note'), blank=True)
     moderated_by = models.ForeignKey(
         User,
@@ -91,16 +109,16 @@ class Upload(models.Model):
         null=True,
         blank=True,
         related_name='moderated_uploads',
-        verbose_name=_('moderated by')
+        verbose_name=_('moderated by'),
     )
     moderated_at = models.DateTimeField(_('moderated at'), null=True, blank=True)
-    
-    # Stats
+
+    # ── Stats ─────────────────────────────────────────────────
     view_count = models.PositiveIntegerField(_('view count'), default=0)
     like_count = models.PositiveIntegerField(_('like count'), default=0)
     download_count = models.PositiveIntegerField(_('download count'), default=0)
-    
-    # Timestamps
+
+    # ── Timestamps ────────────────────────────────────────────
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
@@ -111,171 +129,187 @@ class Upload(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        uploader = self.uploader_name or self.uploader_user.full_name if self.uploader_user else 'Anonymous'
+        uploader = self.uploader_display_name
         return f"{self.original_filename} by {uploader}"
 
-    def save(self, *args, **kwargs):
-        if self.file:
-            # Set file size if not set
-            if not self.file_size:
-                self.file_size = self.file.size
-            
-            # Set original filename if not set
-            if not self.original_filename:
-                self.original_filename = os.path.basename(self.file.name)
-            
-            # Determine file type and process accordingly
-            self.determine_file_type()
-            
-        super().save(*args, **kwargs)
-        
-        # Generate thumbnail after saving
-        if self.file and not self.thumbnail:
-            self.generate_thumbnail()
+    # ── Lifecycle ─────────────────────────────────────────────
 
-    def determine_file_type(self):
-        """Determine file type based on file extension and MIME type"""
-        if not self.file:
-            return
-        
-        ext = self.original_filename.split('.')[-1].lower()
-        
-        # Image files
-        if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff']:
+    def save(self, *args, **kwargs):
+        if self.file and not self.pk:
+            # New upload only — process on first save
+            self._process_new_upload()
+        elif self.file and not self.file_size:
+            self.file_size = self.file.size
+
+        super().save(*args, **kwargs)
+
+        # Generate thumbnail after DB row exists
+        if self.file and self.file_type == 'image' and not self.thumbnail:
+            self._generate_thumbnail()
+
+        # Broadcast to Supabase Realtime subscribers
+        from utils.supabase import broadcast_new_media
+        broadcast_new_media(str(self.album_id), {
+            'id': str(self.id),
+            'uploader_name': self.uploader_display_name,
+            'media_type': self.file_type,
+            'thumbnail_url': None,  # filled in after thumbnail generation
+        })
+
+    def _process_new_upload(self):
+        """
+        Called once on the very first save.
+        1. Determine file type (magic bytes check)
+        2. If image: convert to WebP, strip EXIF
+        3. Hash the file for scan logging
+        4. Set file_size
+        """
+        from utils.image_processor import (
+            validate_magic_bytes,
+            process_image,
+            scan_file,
+        )
+        from django.conf import settings
+
+        raw_name = self.file.name if self.file else ''
+        ext = raw_name.rsplit('.', 1)[-1].lower() if '.' in raw_name else ''
+
+        # Store original filename for display
+        if not self.original_filename:
+            self.original_filename = os.path.basename(raw_name)
+
+        # Determine file type
+        self._set_file_type(ext)
+
+        # Magic bytes validation
+        if not validate_magic_bytes(self.file, ext):
+            raise ValidationError(
+                f"Dosya türü doğrulanamadı. Lütfen geçerli bir {ext.upper()} dosyası yükleyin."
+            )
+
+        # Scan (logs hash; ClamAV-ready)
+        scan_result = scan_file(self.file)
+        self.file_hash = scan_result.get('hash', '')
+
+        # Image processing → WebP
+        if self.file_type == 'image' and getattr(settings, 'MIRRA_CONVERT_TO_WEBP', True):
+            webp_bytes = process_image(self.file)
+            if webp_bytes:
+                from django.core.files.base import ContentFile
+                webp_name = f"{uuid.uuid4()}.webp"
+                self.file.save(webp_name, ContentFile(webp_bytes.read()), save=False)
+                self.mime_type = 'image/webp'
+            else:
+                self.mime_type = f'image/{ext}'
+        elif self.file_type == 'video':
+            self.mime_type = f'video/{ext}'
+        elif self.file_type == 'audio':
+            self.mime_type = f'audio/{ext}'
+
+        # Always update file_size after potential conversion
+        self.file_size = self.file.size
+
+    def _set_file_type(self, ext: str):
+        """Map file extension to file_type field."""
+        image_exts = {'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'heic'}
+        video_exts = {'mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm'}
+        audio_exts = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}
+        doc_exts = {'pdf', 'doc', 'docx', 'txt', 'rtf'}
+
+        if ext in image_exts:
             self.file_type = 'image'
-            if ext in ['jpg', 'jpeg', 'png']:
-                self.extract_image_metadata()
-        
-        # Video files
-        elif ext in ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm']:
+        elif ext in video_exts:
             self.file_type = 'video'
-        
-        # Audio files
-        elif ext in ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a']:
+        elif ext in audio_exts:
             self.file_type = 'audio'
-        
-        # Document files
-        elif ext in ['pdf', 'doc', 'docx', 'txt', 'rtf']:
+        elif ext in doc_exts:
             self.file_type = 'document'
-        
         else:
             self.file_type = 'other'
 
-    def extract_image_metadata(self):
-        """Extract metadata from image files"""
+    def _generate_thumbnail(self):
+        """Generate a WebP thumbnail after the file is saved."""
+        if self.file_type != 'image':
+            return
         try:
-            with Image.open(self.file.path) as img:
-                self.width, self.height = img.size
-                
-                # Extract EXIF data
-                if hasattr(img, '_getexif'):
-                    exif = img._getexif()
-                    if exif:
-                        self.exif_data = dict(exif)
+            from utils.image_processor import generate_thumbnail_webp
+            thumb_bytes = generate_thumbnail_webp(self.file)
+            if thumb_bytes:
+                thumb_name = f"thumb_{self.id}.webp"
+                self.thumbnail.save(thumb_name, thumb_bytes, save=False)
+                # Update only thumbnail column — avoid re-triggering full save()
+                Upload.objects.filter(pk=self.pk).update(thumbnail=self.thumbnail.name)
         except Exception as e:
-            print(f"Error extracting image metadata: {e}")
+            import logging
+            logging.getLogger("mirra.uploads").warning(
+                "Thumbnail generation failed for upload %s: %s", self.id, e
+            )
 
-    def generate_thumbnail(self):
-        """Generate thumbnail for images and videos"""
-        if self.file_type == 'image':
-            self.generate_image_thumbnail()
-        elif self.file_type == 'video':
-            self.generate_video_thumbnail()
+    # ── Validation ────────────────────────────────────────────
 
-    def generate_image_thumbnail(self):
-        """Generate thumbnail for image files"""
-        try:
-            with Image.open(self.file.path) as img:
-                # Convert to RGB if necessary
-                if img.mode != 'RGB':
-                    img = img.convert('RGB')
-                
-                # Create thumbnail
-                img.thumbnail((300, 300), Image.Resampling.LANCZOS)
-                
-                # Save thumbnail
-                thumb_name = f"thumb_{self.id}.jpg"
-                thumb_path = f"thumbnails/{thumb_name}"
-                
-                from django.core.files.base import ContentFile
-                from io import BytesIO
-                
-                thumb_io = BytesIO()
-                img.save(thumb_io, format='JPEG', quality=85)
-                thumb_io.seek(0)
-                
-                self.thumbnail.save(
-                    thumb_name,
-                    ContentFile(thumb_io.read()),
-                    save=False
+    def clean(self):
+        """Validate upload constraints against album settings."""
+        if not self.album_id:
+            return
+
+        can_upload, message = self.album.can_upload()
+        if not can_upload:
+            raise ValidationError(message)
+
+        if self.file and self.file.size:
+            from django.conf import settings
+
+            # Per-type size limits
+            limits = {
+                'image': settings.MAX_UPLOAD_SIZE_IMAGE,
+                'video': settings.MAX_UPLOAD_SIZE_VIDEO,
+                'audio': settings.MAX_UPLOAD_SIZE_AUDIO,
+            }
+            limit = limits.get(self.file_type, settings.MAX_UPLOAD_SIZE_IMAGE)
+            if self.file.size > limit:
+                raise ValidationError(
+                    f"Dosya boyutu izin verilen limiti aşıyor ({limit // (1024*1024)} MB)."
                 )
-                
-        except Exception as e:
-            print(f"Error generating thumbnail: {e}")
 
-    def generate_video_thumbnail(self):
-        """Generate thumbnail for video files (placeholder for now)"""
-        # TODO: Implement video thumbnail generation using ffmpeg
-        pass
+    # ── Properties ────────────────────────────────────────────
 
     @property
-    def file_size_mb(self):
-        """Get file size in MB"""
+    def file_size_mb(self) -> float:
         return round(self.file_size / (1024 * 1024), 2)
 
     @property
-    def uploader_display_name(self):
-        """Get display name for uploader"""
+    def uploader_display_name(self) -> str:
         if self.uploader_user:
             return self.uploader_user.full_name
-        return self.uploader_name or 'Anonymous'
+        return self.uploader_name or 'Anonim'
 
-    def clean(self):
-        """Validate upload constraints"""
-        if self.album:
-            # Check if album accepts uploads
-            can_upload, message = self.album.can_upload()
-            if not can_upload:
-                raise ValidationError(message)
-            
-            # Check file size limit
-            max_size = self.album.max_file_size_mb * 1024 * 1024  # Convert to bytes
-            if self.file and self.file.size > max_size:
-                raise ValidationError(f"File size exceeds limit of {self.album.max_file_size_mb}MB")
-            
-            # Check file type
-            if self.original_filename:
-                ext = self.original_filename.split('.')[-1].lower()
-                if ext not in self.album.allowed_file_types:
-                    raise ValidationError(f"File type '{ext}' is not allowed for this album")
+    @property
+    def is_image(self) -> bool:
+        return self.file_type == 'image'
+
+    @property
+    def is_video(self) -> bool:
+        return self.file_type == 'video'
+
+    @property
+    def is_audio(self) -> bool:
+        return self.file_type == 'audio'
 
 
 class UploadComment(models.Model):
-    """
-    Comments on uploads
-    """
+    """Comments on uploads."""
+
     upload = models.ForeignKey(
-        Upload, 
-        on_delete=models.CASCADE, 
-        related_name='comments',
-        verbose_name=_('upload')
+        Upload, on_delete=models.CASCADE, related_name='comments', verbose_name=_('upload')
     )
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='upload_comments',
-        verbose_name=_('author')
+        User, on_delete=models.CASCADE, related_name='upload_comments', verbose_name=_('author')
     )
     content = models.TextField(_('content'))
     parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='replies',
-        verbose_name=_('parent comment')
+        'self', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='replies', verbose_name=_('parent comment'),
     )
-    
     is_approved = models.BooleanField(_('is approved'), default=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
@@ -291,38 +325,32 @@ class UploadComment(models.Model):
 
 
 class UploadLike(models.Model):
-    """
-    Likes on uploads
-    """
+    """Likes on uploads — also supports anonymous (cookie-based) likes."""
+
     upload = models.ForeignKey(
-        Upload, 
-        on_delete=models.CASCADE, 
-        related_name='likes',
-        verbose_name=_('upload')
+        Upload, on_delete=models.CASCADE, related_name='likes', verbose_name=_('upload')
     )
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='upload_likes',
-        verbose_name=_('user')
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='upload_likes', verbose_name=_('user'),
     )
-    
+    # For anonymous guests: store cookie session ID
+    session_key = models.CharField(_('session key'), max_length=64, blank=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
 
     class Meta:
         db_table = 'upload_likes'
-        unique_together = ['upload', 'user']
         verbose_name = _('Upload Like')
         verbose_name_plural = _('Upload Likes')
 
     def __str__(self):
-        return f"{self.user.full_name} likes {self.upload.original_filename}"
+        name = self.user.full_name if self.user else 'Anonim'
+        return f"{name} likes {self.upload.original_filename}"
 
 
 class UploadReport(models.Model):
-    """
-    Reports for inappropriate content
-    """
+    """Reports for inappropriate content."""
+
     REASON_CHOICES = [
         ('inappropriate', _('Inappropriate Content')),
         ('spam', _('Spam')),
@@ -332,31 +360,19 @@ class UploadReport(models.Model):
     ]
 
     upload = models.ForeignKey(
-        Upload, 
-        on_delete=models.CASCADE, 
-        related_name='reports',
-        verbose_name=_('upload')
+        Upload, on_delete=models.CASCADE, related_name='reports', verbose_name=_('upload')
     )
     reporter = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='upload_reports',
-        verbose_name=_('reporter')
+        User, on_delete=models.CASCADE, related_name='upload_reports', verbose_name=_('reporter')
     )
     reason = models.CharField(_('reason'), max_length=20, choices=REASON_CHOICES)
     description = models.TextField(_('description'), blank=True)
-    
     is_resolved = models.BooleanField(_('is resolved'), default=False)
     resolved_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='resolved_reports',
-        verbose_name=_('resolved by')
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='resolved_reports', verbose_name=_('resolved by'),
     )
     resolved_at = models.DateTimeField(_('resolved at'), null=True, blank=True)
-    
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
 
     class Meta:
@@ -366,4 +382,4 @@ class UploadReport(models.Model):
         verbose_name_plural = _('Upload Reports')
 
     def __str__(self):
-        return f"Report by {self.reporter.full_name} on {self.upload.original_filename}" 
+        return f"Report by {self.reporter.full_name} on {self.upload.original_filename}"

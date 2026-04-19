@@ -9,7 +9,7 @@ import {
     DocumentTextIcon,
     EyeIcon,
     HeartIcon,
-    CloudArrowDownIcon
+    CloudArrowDownIcon,
 } from '@heroicons/react/24/outline';
 
 const DashboardPage = () => {
@@ -19,13 +19,14 @@ const DashboardPage = () => {
         total_albums: 0,
         active_albums: 0,
         total_uploads: 0,
-        total_size_mb: 0
+        total_size_mb: 0,
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchAlbums();
         fetchStats();
+        // eslint-disable-next-line
     }, []);
 
     const fetchAlbums = async() => {
@@ -39,7 +40,7 @@ const DashboardPage = () => {
                     status: 'active',
                     total_uploads: 45,
                     total_size_mb: 125.5,
-                    view_count: 156
+                    view_count: 156,
                 },
                 {
                     id: '2',
@@ -49,11 +50,12 @@ const DashboardPage = () => {
                     status: 'completed',
                     total_uploads: 23,
                     total_size_mb: 67.2,
-                    view_count: 89
-                }
+                    view_count: 89,
+                },
             ];
             setAlbums(mockAlbums);
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Error fetching albums:', error);
         }
     };
@@ -65,10 +67,11 @@ const DashboardPage = () => {
                 total_albums: 2,
                 active_albums: 1,
                 total_uploads: 68,
-                total_size_mb: 192.7
+                total_size_mb: 192.7,
             };
             setStats(mockStats);
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Error fetching stats:', error);
         } finally {
             setLoading(false);
@@ -102,10 +105,12 @@ const DashboardPage = () => {
     };
 
     if (loading) {
-        return ( < div className = "min-h-screen bg-gray-50 flex items-center justify-center" >
+        return ( <
+            div className = "min-h-screen bg-gray-50 flex items-center justify-center" >
             <
-            div className = "animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600" > < /div> < /
-            div >
+            div className = "animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600" / >
+            <
+            /div>
         );
     }
 
@@ -121,8 +126,8 @@ const DashboardPage = () => {
         /h1> <
         p className = "mt-2 text-gray-600" >
         Albümlerinizi yönetin ve etkinlik anılarınızı takip edin. <
-        /p> < /
-        div >
+        /p> <
+        /div>
 
         { /* Stats Cards */ } <
         div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" >
@@ -139,10 +144,10 @@ const DashboardPage = () => {
         div className = "ml-4" >
         <
         p className = "text-sm font-medium text-gray-600" > Toplam Albüm < /p> <
-        p className = "text-2xl font-bold text-gray-900" > { stats.total_albums } < /p> < /
-        div > <
-        /div> < /
-        div >
+        p className = "text-2xl font-bold text-gray-900" > { stats.total_albums } < /p> <
+        /div> <
+        /div> <
+        /div>
 
         <
         div className = "bg-white rounded-lg shadow p-6" >
@@ -157,10 +162,10 @@ const DashboardPage = () => {
         div className = "ml-4" >
         <
         p className = "text-sm font-medium text-gray-600" > Aktif Albüm < /p> <
-        p className = "text-2xl font-bold text-gray-900" > { stats.active_albums } < /p> < /
-        div > <
-        /div> < /
-        div >
+        p className = "text-2xl font-bold text-gray-900" > { stats.active_albums } < /p> <
+        /div> <
+        /div> <
+        /div>
 
         <
         div className = "bg-white rounded-lg shadow p-6" >
@@ -175,10 +180,10 @@ const DashboardPage = () => {
         div className = "ml-4" >
         <
         p className = "text-sm font-medium text-gray-600" > Toplam Yükleme < /p> <
-        p className = "text-2xl font-bold text-gray-900" > { stats.total_uploads } < /p> < /
-        div > <
-        /div> < /
-        div >
+        p className = "text-2xl font-bold text-gray-900" > { stats.total_uploads } < /p> <
+        /div> <
+        /div> <
+        /div>
 
         <
         div className = "bg-white rounded-lg shadow p-6" >
@@ -194,10 +199,11 @@ const DashboardPage = () => {
         <
         p className = "text-sm font-medium text-gray-600" > Toplam Boyut < /p> <
         p className = "text-2xl font-bold text-gray-900" > { stats.total_size_mb }
-        MB < /p> < /
-        div > <
-        /div> < /
-        div > <
+        MB <
+        /p> <
+        /div> <
+        /div> <
+        /div> <
         /div>
 
         { /* Quick Actions */ } <
@@ -205,8 +211,8 @@ const DashboardPage = () => {
         <
         div className = "px-6 py-4 border-b border-gray-200" >
         <
-        h2 className = "text-lg font-medium text-gray-900" > Hızlı İşlemler < /h2> < /
-        div > <
+        h2 className = "text-lg font-medium text-gray-900" > Hızlı İşlemler < /h2> <
+        /div> <
         div className = "p-6" >
         <
         div className = "grid grid-cols-1 md:grid-cols-3 gap-4" >
@@ -219,8 +225,8 @@ const DashboardPage = () => {
         div >
         <
         h3 className = "font-medium text-gray-900" > Yeni Albüm Oluştur < /h3> <
-        p className = "text-sm text-gray-600" > Etkinlik albümü oluşturun < /p> < /
-        div > <
+        p className = "text-sm text-gray-600" > Etkinlik albümü oluşturun < /p> <
+        /div> <
         /Link>
 
         <
@@ -232,8 +238,8 @@ const DashboardPage = () => {
         div >
         <
         h3 className = "font-medium text-gray-900" > Albümleri Görüntüle < /h3> <
-        p className = "text-sm text-gray-600" > Tüm albümlerinizi yönetin < /p> < /
-        div > <
+        p className = "text-sm text-gray-600" > Tüm albümlerinizi yönetin < /p> <
+        /div> <
         /Link>
 
         <
@@ -245,12 +251,12 @@ const DashboardPage = () => {
         div >
         <
         h3 className = "font-medium text-gray-900" > Ayarlar < /h3> <
-        p className = "text-sm text-gray-600" > Hesap ayarlarınızı düzenleyin < /p> < /
-        div > <
-        /Link> < /
-        div > <
-        /div> < /
-        div >
+        p className = "text-sm text-gray-600" > Hesap ayarlarınızı düzenleyin < /p> <
+        /div> <
+        /Link> <
+        /div> <
+        /div> <
+        /div>
 
         { /* Recent Albums */ } <
         div className = "bg-white rounded-lg shadow" >
@@ -261,15 +267,17 @@ const DashboardPage = () => {
         Link to = "/albums"
         className = "text-blue-600 hover:text-blue-500 text-sm font-medium" >
         Tümünü Görüntüle <
-        /Link> < /
-        div > <
+        /Link> <
+        /div> <
         div className = "p-6" > {
             albums.length === 0 ? ( <
                 div className = "text-center py-12" >
                 <
                 PhotoIcon className = "mx-auto h-12 w-12 text-gray-400" / >
                 <
-                h3 className = "mt-2 text-sm font-medium text-gray-900" > Henüz albüm yok < /h3> <
+                h3 className = "mt-2 text-sm font-medium text-gray-900" >
+                Henüz albüm yok <
+                /h3> <
                 p className = "mt-1 text-sm text-gray-500" >
                 İlk albümünüzü oluşturmaya başlayın. <
                 /p> <
@@ -280,8 +288,8 @@ const DashboardPage = () => {
                 <
                 PlusIcon className = "-ml-1 mr-2 h-5 w-5" / >
                 Albüm Oluştur <
-                /Link> < /
-                div > <
+                /Link> <
+                /div> <
                 /div>
             ) : ( <
                 div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" > {
@@ -291,22 +299,26 @@ const DashboardPage = () => {
                         <
                         div className = "flex items-center justify-between mb-4" >
                         <
-                        h3 className = "text-lg font-medium text-gray-900" > { album.title } < /h3> <
-                        span className = { `px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(album.status)}` } > { getStatusText(album.status) } <
-                        /span> < /
-                        div >
+                        h3 className = "text-lg font-medium text-gray-900" > { album.title } <
+                        /h3> <
+                        span className = { `px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                          album.status
+                        )}` } >
+                        { getStatusText(album.status) } <
+                        /span> <
+                        /div>
 
                         <
                         div className = "space-y-2 mb-4" >
                         <
                         p className = "text-sm text-gray-600" >
                         <
-                        span className = "font-medium" > Etkinlik: < /span> {album.event_type.name} < /
-                        p > <
+                        span className = "font-medium" > Etkinlik: < /span> { album.event_type.name } <
+                        /p> <
                         p className = "text-sm text-gray-600" >
                         <
-                        span className = "font-medium" > Tarih: < /span> {new Date(album.event_date).toLocaleDateString('tr-TR')} < /
-                        p > <
+                        span className = "font-medium" > Tarih: < /span> { new Date(album.event_date).toLocaleDateString('tr-TR') } <
+                        /p> <
                         /div>
 
                         <
@@ -314,20 +326,23 @@ const DashboardPage = () => {
                         <
                         div >
                         <
-                        p className = "text-lg font-semibold text-gray-900" > { album.total_uploads } < /p> <
-                        p className = "text-xs text-gray-600" > Yükleme < /p> < /
-                        div > <
+                        p className = "text-lg font-semibold text-gray-900" > { album.total_uploads } <
+                        /p> <
+                        p className = "text-xs text-gray-600" > Yükleme < /p> <
+                        /div> <
                         div >
                         <
                         p className = "text-lg font-semibold text-gray-900" > { album.total_size_mb }
-                        MB < /p> <
-                        p className = "text-xs text-gray-600" > Boyut < /p> < /
-                        div > <
+                        MB <
+                        /p> <
+                        p className = "text-xs text-gray-600" > Boyut < /p> <
+                        /div> <
                         div >
                         <
-                        p className = "text-lg font-semibold text-gray-900" > { album.view_count } < /p> <
-                        p className = "text-xs text-gray-600" > Görüntüleme < /p> < /
-                        div > <
+                        p className = "text-lg font-semibold text-gray-900" > { album.view_count } <
+                        /p> <
+                        p className = "text-xs text-gray-600" > Görüntüleme < /p> <
+                        /div> <
                         /div>
 
                         <
@@ -340,18 +355,18 @@ const DashboardPage = () => {
                         Link to = { `/album/${album.id}/edit` }
                         className = "flex-1 bg-gray-600 text-white text-center py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors" >
                         Düzenle <
-                        /Link> < /
-                        div > <
+                        /Link> <
+                        /div> <
                         /div>
                     ))
                 } <
                 /div>
             )
         } <
-        /div> < /
-        div > <
-        /div> < /
-        div >
+        /div> <
+        /div> <
+        /div> <
+        /div>
     );
 };
 
