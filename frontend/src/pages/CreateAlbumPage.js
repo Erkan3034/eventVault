@@ -29,7 +29,8 @@ const CreateAlbumPage = () => {
     const fetchEventTypes = async() => {
         try {
             const res = await axios.get('/api/v1/albums/event-types/');
-            setEventTypes(res.data);
+            const data = res.data;
+            setEventTypes(Array.isArray(data) ? data : (data.results || []));
         } catch (err) {
             console.error('Error fetching event types:', err);
             toast.error('Etkinlik türleri yüklenirken bir hata oluştu.');
@@ -51,15 +52,16 @@ const CreateAlbumPage = () => {
         } catch (err) {
             console.error('Error creating album:', err); // Log the full error for debugging
             // Display a more specific error message if available from the API
-            const errorMessage = err.response ? .data ? .message || 'Albüm oluşturulamadı. Lütfen tekrar deneyin.';
+            const errorMessage = err.response?.data?.message
+                || (typeof err.response?.data === 'object'
+                    ? Object.values(err.response.data).flat().join(' ')
+                    : null)
+                || 'Albüm oluşturulamadı. Lütfen tekrar deneyin.';
             toast.error(errorMessage);
         } finally {
             setLoading(false); // Reset loading state
         }
     };
-
-    // Get today's date in YYYY-MM-DD format for the min attribute of the date input
-    const today = new Date().toISOString().split('T')[0];
 
     // Show loading spinner while fetching event types initially
     if (loading && !album) {
@@ -136,7 +138,7 @@ const CreateAlbumPage = () => {
         option value = "" > Seçiniz < /option> {
             eventTypes.map((et) => ( <
                 option key = { et.id }
-                value = { et.id } > { et.name } < /option>
+                value = { et.id } > { et.name_tr || et.name } < /option>
             ))
         } <
         /select> <
@@ -150,7 +152,6 @@ const CreateAlbumPage = () => {
         name = "event_date"
         value = { form.event_date }
         onChange = { handleChange }
-        min = { today } // Set minimum date to today
         required className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" / >
         <
         /div> <

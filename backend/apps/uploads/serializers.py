@@ -13,13 +13,13 @@ class UploadSerializer(serializers.ModelSerializer):
             'id', 'album', 'file', 'original_filename', 'file_type', 'file_size',
             'file_size_mb', 'mime_type', 'thumbnail', 'width', 'height', 'duration',
             'uploader_name', 'uploader_email', 'uploader_phone', 'uploader_user',
-            'uploader_display_name', 'caption', 'message', 'exif_data',
+            'uploader_display_name', 'caption', 'message',
             'location_data', 'status', 'moderation_note', 'view_count',
             'like_count', 'download_count', 'created_at', 'updated_at'
         )
         read_only_fields = (
             'id', 'file_size', 'file_size_mb', 'mime_type', 'thumbnail',
-            'width', 'height', 'duration', 'exif_data', 'location_data',
+            'width', 'height', 'duration', 'location_data',
             'status', 'moderation_note', 'view_count', 'like_count',
             'download_count', 'created_at', 'updated_at'
         )
@@ -30,12 +30,13 @@ class UploadListSerializer(serializers.ModelSerializer):
     uploader_display_name = serializers.ReadOnlyField()
     file_size_mb = serializers.ReadOnlyField()
     thumbnail_url = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Upload
         fields = (
             'id', 'original_filename', 'file_type', 'file_size_mb',
-            'uploader_display_name', 'caption', 'thumbnail_url',
+            'uploader_display_name', 'caption', 'thumbnail_url', 'file_url',
             'view_count', 'like_count', 'status', 'created_at'
         )
         read_only_fields = ('id', 'file_size_mb', 'uploader_display_name', 'view_count', 'like_count', 'status', 'created_at')
@@ -43,6 +44,11 @@ class UploadListSerializer(serializers.ModelSerializer):
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
             return self.context['request'].build_absolute_uri(obj.thumbnail.url)
+        return None
+
+    def get_file_url(self, obj):
+        if obj.file:
+            return self.context['request'].build_absolute_uri(obj.file.url)
         return None
 
 
@@ -61,13 +67,13 @@ class UploadDetailSerializer(serializers.ModelSerializer):
             'file_size', 'file_size_mb', 'mime_type', 'thumbnail', 'thumbnail_url',
             'width', 'height', 'duration', 'uploader_name', 'uploader_email',
             'uploader_phone', 'uploader_user', 'uploader_display_name', 'caption',
-            'message', 'exif_data', 'location_data', 'status', 'moderation_note',
+            'message', 'location_data', 'status', 'moderation_note',
             'view_count', 'like_count', 'download_count', 'is_liked_by_user',
             'created_at', 'updated_at'
         )
         read_only_fields = (
             'id', 'album', 'file_size', 'file_size_mb', 'mime_type', 'thumbnail',
-            'width', 'height', 'duration', 'exif_data', 'location_data',
+            'width', 'height', 'duration', 'location_data',
             'status', 'moderation_note', 'view_count', 'like_count',
             'download_count', 'is_liked_by_user', 'created_at', 'updated_at'
         )

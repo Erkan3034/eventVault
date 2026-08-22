@@ -98,7 +98,9 @@ def send_email_notification(request):
             template=template,
             recipient_email=recipient_email,
             subject=subject,
-            context=context,
+            html_content=html_message,
+            text_content=plain_message,
+            context_data=context,
             status='sent'
         )
         
@@ -111,7 +113,8 @@ def send_email_notification(request):
                 template=template,
                 recipient_email=recipient_email,
                 subject='',
-                context=context,
+                html_content='',
+                context_data=context,
                 status='failed',
                 error_message=str(e)
             )
@@ -192,10 +195,10 @@ def retry_failed_email(request, email_id):
         # Re-send email
         send_mail(
             subject=email_notification.subject,
-            message=email_notification.plain_message,
+            message=email_notification.text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email_notification.recipient_email],
-            html_message=email_notification.html_message,
+            html_message=email_notification.html_content,
             fail_silently=False,
         )
         

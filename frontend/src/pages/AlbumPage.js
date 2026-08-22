@@ -29,7 +29,8 @@ const AlbumPage = () => {
     const fetchUploads = async() => {
         try {
             const res = await axios.get(`/api/v1/uploads/album/${id}/`);
-            setUploads(res.data);
+            const data = res.data;
+            setUploads(Array.isArray(data) ? data : (data.results || []));
         } catch (err) {
             setUploads([]);
         } finally {
@@ -61,7 +62,7 @@ const AlbumPage = () => {
         div >
         <
         h2 className = "text-2xl font-bold mb-2" > { album.title } < /h2> <
-        p className = "text-gray-600 mb-1" > { album.event_type && album.event_type.name ? album.event_type.name : 'Etkinlik' } | { album.event_date } <
+        p className = "text-gray-600 mb-1" > { album.event_type && (album.event_type.name_tr || album.event_type.name) ? (album.event_type.name_tr || album.event_type.name) : 'Etkinlik' } | { album.event_date } <
         /p> <
         p className = "text-gray-500 text-sm mb-2" > { album.event_location } < /p> <
         p className = "text-gray-700 mb-2" > { album.description } < /p> <
@@ -107,21 +108,21 @@ const AlbumPage = () => {
                         span className = "ml-2 text-xs text-gray-500" > { upload.file_type } < /span> <
                         /div> <
                         div className = "flex-1 mb-2" > {
-                            upload.file_type.startsWith('image') ? ( <
-                                img src = { upload.file }
+                            upload.file_type === 'image' || (upload.file_type && upload.file_type.startsWith('image')) ? ( <
+                                img src = { upload.thumbnail_url || upload.file_url || upload.file }
                                 alt = { upload.original_filename }
                                 className = "max-h-48 rounded" /
                                 >
-                            ) : upload.file_type.startsWith('video') ? ( <
-                                video src = { upload.file }
+                            ) : upload.file_type === 'video' || (upload.file_type && upload.file_type.startsWith('video')) ? ( <
+                                video src = { upload.file_url || upload.file }
                                 controls className = "max-h-48 rounded" /
                                 >
-                            ) : upload.file_type.startsWith('audio') ? ( <
-                                audio src = { upload.file }
+                            ) : upload.file_type === 'audio' || (upload.file_type && upload.file_type.startsWith('audio')) ? ( <
+                                audio src = { upload.file_url || upload.file }
                                 controls /
                                 >
                             ) : ( <
-                                a href = { upload.file }
+                                a href = { upload.file_url || upload.file }
                                 target = "_blank"
                                 rel = "noopener noreferrer"
                                 className = "text-blue-600 underline" >

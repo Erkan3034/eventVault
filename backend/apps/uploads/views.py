@@ -48,34 +48,43 @@ class AnonymousUploadView(generics.CreateAPIView):
     serializer_class = UploadCreateSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_album(self):
+        if not hasattr(self, '_album'):
+            self._album = get_object_or_404(
+                Album,
+                access_code=self.kwargs.get('access_code'),
+                status='active',
+            )
+        return self._album
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['album'] = self.get_album()
+        return context
+
     def create(self, request, *args, **kwargs):
-        access_code = self.kwargs.get('access_code')
-        album = get_object_or_404(Album, access_code=access_code, is_active=True)
-        
+        album = self.get_album()
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            upload = serializer.save(album=album)
-            
-            # Send notification to album owner
-            try:
-                from apps.notifications.models import Notification
-                Notification.objects.create(
-                    recipient=album.owner,
-                    notification_type='new_upload',
-                    title='Yeni Dosya Yüklendi',
-                    message=f'"{album.title}" albümüne yeni bir dosya yüklendi.',
-                    album=album,
-                    upload=upload
-                )
-            except:
-                pass  # Ignore notification errors
-            
-            return Response({
-                'message': 'Dosya başarıyla yüklendi!',
-                'upload': UploadSerializer(upload).data
-            }, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        upload = serializer.save()
+
+        try:
+            from apps.notifications.models import Notification
+            Notification.objects.create(
+                recipient=album.owner,
+                notification_type='upload',
+                title='Yeni Dosya Yüklendi',
+                message=f'"{album.title}" albümüne yeni bir dosya yüklendi.',
+                album=album,
+                upload=upload,
+            )
+        except Exception:
+            pass
+
+        return Response({
+            'message': 'Dosya başarıyla yüklendi!',
+            'upload': UploadSerializer(upload, context={'request': request}).data,
+        }, status=status.HTTP_201_CREATED)
 
 
 class UploadCommentView(generics.ListCreateAPIView):
@@ -89,7 +98,7 @@ class UploadCommentView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         upload_id = self.kwargs.get('upload_id')
         upload = get_object_or_404(Upload, id=upload_id)
-        serializer.save(upload=upload, user=self.request.user)
+        serializer.save(upload=upload, author=self.request.user)
 
 
 class UploadLikeView(generics.CreateAPIView):

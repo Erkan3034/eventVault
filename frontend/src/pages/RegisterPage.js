@@ -37,7 +37,8 @@ const RegisterPage = () => {
                 first_name: formData.first_name,
                 last_name: formData.last_name,
                 email: formData.email,
-                password: formData.password
+                password: formData.password,
+                password_confirm: formData.password_confirm
             });
 
             if (result.success) {

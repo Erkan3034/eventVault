@@ -51,7 +51,7 @@ class AlbumDetailSerializer(serializers.ModelSerializer):
     event_type = EventTypeSerializer(read_only=True)
     owner = serializers.CharField(source='owner.full_name', read_only=True)
     collaborators = AlbumCollaboratorSerializer(many=True, read_only=True)
-    settings = AlbumSettingsSerializer(read_only=True)
+    settings = AlbumSettingsSerializer(source='advanced_settings', read_only=True)
     total_uploads = serializers.ReadOnlyField()
     total_size_mb = serializers.ReadOnlyField()
     upload_url = serializers.ReadOnlyField()
@@ -96,11 +96,13 @@ class AlbumCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         event_type_id = validated_data.pop('event_type_id')
+        validated_data.pop('owner', None)
         event_type = EventType.objects.get(id=event_type_id)
-        
+
         album = Album.objects.create(
             event_type=event_type,
             owner=self.context['request'].user,
+            status='active',
             **validated_data
         )
         

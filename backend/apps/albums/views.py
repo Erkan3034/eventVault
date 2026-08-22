@@ -17,6 +17,7 @@ class EventTypeListView(generics.ListAPIView):
     queryset = EventType.objects.filter(is_active=True)
     serializer_class = EventTypeSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = None
 
 
 class AlbumListCreateView(generics.ListCreateAPIView):
@@ -37,6 +38,16 @@ class AlbumListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        album = serializer.instance
+        return Response(
+            AlbumDetailSerializer(album, context={'request': request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class AlbumDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -80,7 +91,7 @@ class AlbumPublicView(generics.RetrieveAPIView):
     def get_queryset(self):
         return Album.objects.filter(
             access_code=self.kwargs.get('access_code'),
-            is_active=True
+            status='active',
         )
 
 
@@ -111,8 +122,8 @@ class AlbumCollaboratorDetailView(generics.RetrieveUpdateDestroyAPIView):
 @permission_classes([permissions.IsAuthenticated])
 def album_activate(request, id):
     album = get_object_or_404(Album, id=id, owner=request.user)
-    album.is_active = True
-    album.save()
+    album.status = 'active'
+    album.save(update_fields=['status'])
     return Response({'message': 'Albüm aktifleştirildi.'}, status=status.HTTP_200_OK)
 
 
@@ -120,8 +131,8 @@ def album_activate(request, id):
 @permission_classes([permissions.IsAuthenticated])
 def album_deactivate(request, id):
     album = get_object_or_404(Album, id=id, owner=request.user)
-    album.is_active = False
-    album.save()
+    album.status = 'archived'
+    album.save(update_fields=['status'])
     return Response({'message': 'Albüm deaktifleştirildi.'}, status=status.HTTP_200_OK)
 
 
@@ -130,15 +141,18 @@ def album_deactivate(request, id):
 def user_albums_stats(request):
     user = request.user
     total_albums = Album.objects.filter(owner=user).count()
-    active_albums = Album.objects.filter(owner=user, is_active=True).count()
-    
+    active_albums = Album.objects.filter(owner=user, status='active').count()
+
     from apps.uploads.models import Upload
-    total_uploads = Upload.objects.filter(album__owner=user).count()
-    
+    from django.db.models import Sum
+    uploads = Upload.objects.filter(album__owner=user)
+    total_bytes = uploads.aggregate(total=Sum('file_size'))['total'] or 0
+
     stats = {
         'total_albums': total_albums,
         'active_albums': active_albums,
-        'total_uploads': total_uploads,
+        'total_uploads': uploads.count(),
+        'total_size_mb': round(total_bytes / (1024 * 1024), 2),
     }
     
     return Response(stats, status=status.HTTP_200_OK) 

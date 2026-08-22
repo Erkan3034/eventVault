@@ -36,7 +36,11 @@ class EventType(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = (
+                slugify(self.name, allow_unicode=True)
+                or slugify(self.name_tr or '', allow_unicode=True)
+                or 'etkinlik'
+            )
         super().save(*args, **kwargs)
 
 
@@ -118,7 +122,7 @@ class Album(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = slugify(self.title, allow_unicode=True) or 'album'
         
         if not self.access_code:
             self.access_code = self.generate_access_code()
@@ -156,7 +160,7 @@ class Album(models.Model):
         # QR code points to the Mirra guest upload page
         from django.conf import settings
         app_url = getattr(settings, 'MIRRA_APP_URL', 'https://mirra.com.tr')
-        upload_url = f"{app_url}/y/{self.access_code}"
+        upload_url = f"{app_url}/upload/{self.access_code}"
         qr.add_data(upload_url)
         qr.make(fit=True)
 
@@ -180,7 +184,7 @@ class Album(models.Model):
         """Guest upload URL (short form used in QR code)."""
         from django.conf import settings
         app_url = getattr(settings, 'MIRRA_APP_URL', '')
-        return f"{app_url}/y/{self.access_code}"
+        return f"{app_url}/upload/{self.access_code}"
 
     @property
     def total_uploads(self):
@@ -190,7 +194,8 @@ class Album(models.Model):
     @property
     def total_size_mb(self):
         """Get total size of all uploads in MB"""
-        total_bytes = sum(upload.file.size for upload in self.uploads.all() if upload.file)
+        from django.db.models import Sum
+        total_bytes = self.uploads.aggregate(total=Sum('file_size'))['total'] or 0
         return round(total_bytes / (1024 * 1024), 2)
 
     def can_upload(self, user=None):

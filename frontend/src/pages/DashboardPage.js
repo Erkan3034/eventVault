@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
     PlusIcon,
     PhotoIcon,
-    VideoCameraIcon,
-    MusicalNoteIcon,
-    DocumentTextIcon,
     EyeIcon,
     HeartIcon,
     CloudArrowDownIcon,
 } from '@heroicons/react/24/outline';
+
+const unwrapList = (data) => {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.results)) return data.results;
+    return [];
+};
 
 const DashboardPage = () => {
     const { user } = useAuth();
@@ -24,59 +28,29 @@ const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchAlbums();
-        fetchStats();
-        // eslint-disable-next-line
+        const load = async () => {
+            try {
+                const [albumsRes, statsRes] = await Promise.all([
+                    axios.get('/api/v1/albums/'),
+                    axios.get('/api/v1/albums/user/stats/'),
+                ]);
+                setAlbums(unwrapList(albumsRes.data));
+                setStats({
+                    total_albums: statsRes.data.total_albums || 0,
+                    active_albums: statsRes.data.active_albums || 0,
+                    total_uploads: statsRes.data.total_uploads || 0,
+                    total_size_mb: statsRes.data.total_size_mb || 0,
+                });
+            } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Error fetching dashboard data:', error);
+                setAlbums([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
     }, []);
-
-    const fetchAlbums = async() => {
-        try {
-            // TODO: Replace with actual API call
-            const mockAlbums = [{
-                    id: '1',
-                    title: 'Düğün Albümü',
-                    event_type: { name: 'Düğün' },
-                    event_date: '2024-06-15',
-                    status: 'active',
-                    total_uploads: 45,
-                    total_size_mb: 125.5,
-                    view_count: 156,
-                },
-                {
-                    id: '2',
-                    title: 'Doğum Günü Partisi',
-                    event_type: { name: 'Doğum Günü' },
-                    event_date: '2024-05-20',
-                    status: 'completed',
-                    total_uploads: 23,
-                    total_size_mb: 67.2,
-                    view_count: 89,
-                },
-            ];
-            setAlbums(mockAlbums);
-        } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Error fetching albums:', error);
-        }
-    };
-
-    const fetchStats = async() => {
-        try {
-            // TODO: Replace with actual API call
-            const mockStats = {
-                total_albums: 2,
-                active_albums: 1,
-                total_uploads: 68,
-                total_size_mb: 192.7,
-            };
-            setStats(mockStats);
-        } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Error fetching stats:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -230,7 +204,7 @@ const DashboardPage = () => {
         /Link>
 
         <
-        Link to = "/albums"
+        Link to = "/dashboard"
         className = "flex items-center p-4 border border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors" >
         <
         PhotoIcon className = "h-8 w-8 text-green-600 mr-3" / >
@@ -243,7 +217,7 @@ const DashboardPage = () => {
         /Link>
 
         <
-        Link to = "/settings"
+        Link to = "/profile"
         className = "flex items-center p-4 border border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors" >
         <
         HeartIcon className = "h-8 w-8 text-purple-600 mr-3" / >
@@ -264,7 +238,7 @@ const DashboardPage = () => {
         div className = "px-6 py-4 border-b border-gray-200 flex justify-between items-center" >
         <
         h2 className = "text-lg font-medium text-gray-900" > Son Albümler < /h2> <
-        Link to = "/albums"
+        Link to = "/dashboard"
         className = "text-blue-600 hover:text-blue-500 text-sm font-medium" >
         Tümünü Görüntüle <
         /Link> <
@@ -313,7 +287,7 @@ const DashboardPage = () => {
                         <
                         p className = "text-sm text-gray-600" >
                         <
-                        span className = "font-medium" > Etkinlik: < /span> { album.event_type.name } <
+                        span className = "font-medium" > Etkinlik: < /span> { album.event_type && (album.event_type.name_tr || album.event_type.name) } <
                         /p> <
                         p className = "text-sm text-gray-600" >
                         <
@@ -352,7 +326,7 @@ const DashboardPage = () => {
                         className = "flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors" >
                         Görüntüle <
                         /Link> <
-                        Link to = { `/album/${album.id}/edit` }
+                        Link to = { `/album/${album.id}` }
                         className = "flex-1 bg-gray-600 text-white text-center py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors" >
                         Düzenle <
                         /Link> <

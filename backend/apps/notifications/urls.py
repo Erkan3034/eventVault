@@ -10,7 +10,7 @@ urlpatterns = [
     
     # User notifications
     path('', views.NotificationListView.as_view(), name='notification_list'),
-    path('<int:id>/', views.NotificationDetailView.as_view(), name='notification_detail'),
+    path('<uuid:id>/', views.NotificationDetailView.as_view(), name='notification_detail'),
     path('mark-all-read/', views.mark_all_notifications_read, name='mark_all_read'),
     path('stats/', views.notification_stats, name='notification_stats'),
     
@@ -20,5 +20,5 @@ urlpatterns = [
     
     # Email notification management (admin only)
     path('emails/', views.EmailNotificationListView.as_view(), name='email_list'),
-    path('emails/<int:email_id>/retry/', views.retry_failed_email, name='retry_email'),
+    path('emails/<uuid:email_id>/retry/', views.retry_failed_email, name='retry_email'),
 ] 
