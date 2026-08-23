@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import CreateAlbumPage from './pages/CreateAlbumPage';
 import AlbumPage from './pages/AlbumPage';
+import EditAlbumPage from './pages/EditAlbumPage';
 import UploadPage from './pages/UploadPage';
 import ProfilePage from './pages/ProfilePage';
 import AboutPage from './pages/AboutPage';
@@ -63,6 +64,10 @@ function App() {
                             <Route
                                 path="/album/:id"
                                 element={<ProtectedRoute><AlbumPage /></ProtectedRoute>}
+                            />
+                            <Route
+                                path="/album/:id/edit"
+                                element={<ProtectedRoute><EditAlbumPage /></ProtectedRoute>}
                             />
                             <Route
                                 path="/profile"

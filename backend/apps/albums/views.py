@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
-from .models import Album, EventType, AlbumCollaborator
+from .models import Album, EventType, AlbumCollaborator, AlbumSettings
 from .serializers import (
     EventTypeSerializer, AlbumListSerializer, AlbumDetailSerializer,
     AlbumCreateSerializer, AlbumUpdateSerializer, AlbumQRCodeSerializer,
@@ -58,10 +58,26 @@ class AlbumDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Album.objects.filter(owner=self.request.user)
 
+    def get_object(self):
+        album = super().get_object()
+        AlbumSettings.objects.get_or_create(album=album)
+        return album
+
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
             return AlbumUpdateSerializer
         return AlbumDetailSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        instance.refresh_from_db()
+        return Response(
+            AlbumDetailSerializer(instance, context={'request': request}).data
+        )
 
 
 class AlbumQRCodeView(generics.RetrieveAPIView):
@@ -93,6 +109,11 @@ class AlbumPublicView(generics.RetrieveAPIView):
             access_code=self.kwargs.get('access_code'),
             status='active',
         )
+
+    def get_object(self):
+        album = super().get_object()
+        AlbumSettings.objects.get_or_create(album=album)
+        return album
 
 
 class AlbumCollaboratorView(generics.ListCreateAPIView):
@@ -133,7 +154,7 @@ def album_deactivate(request, id):
     album = get_object_or_404(Album, id=id, owner=request.user)
     album.status = 'archived'
     album.save(update_fields=['status'])
-    return Response({'message': 'Albüm deaktifleştirildi.'}, status=status.HTTP_200_OK)
+    return Response({'message': 'Albüm arşivlendi.', 'status': album.status}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

@@ -60,6 +60,8 @@ const DashboardPage = () => {
                 return 'bg-gray-100 text-gray-800';
             case 'draft':
                 return 'bg-yellow-100 text-yellow-800';
+            case 'archived':
+                return 'bg-gray-200 text-gray-700';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -73,6 +75,8 @@ const DashboardPage = () => {
                 return 'Tamamlandı';
             case 'draft':
                 return 'Taslak';
+            case 'archived':
+                return 'Arşivlendi';
             default:
                 return status;
         }

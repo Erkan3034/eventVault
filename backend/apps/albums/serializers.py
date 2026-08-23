@@ -113,28 +113,64 @@ class AlbumCreateSerializer(serializers.ModelSerializer):
 
 
 class AlbumUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating albums"""
-    
+    event_type_id = serializers.IntegerField(required=False)
+    welcome_message = serializers.CharField(required=False, allow_blank=True)
+    thank_you_message = serializers.CharField(required=False, allow_blank=True)
+    notify_on_upload = serializers.BooleanField(required=False)
+    notification_email = serializers.EmailField(required=False, allow_blank=True)
+    cover_image = serializers.ImageField(required=False, allow_null=True)
+
     class Meta:
         model = Album
         fields = (
-            'title', 'description', 'event_location', 'privacy',
-            'max_files_per_user', 'allowed_file_types', 'max_file_size_mb',
-            'require_approval', 'enable_comments', 'expires_at'
+            'title', 'description', 'event_type_id', 'event_date',
+            'event_location', 'privacy', 'status',
+            'max_files_per_user', 'max_file_size_mb',
+            'require_approval', 'enable_comments', 'expires_at',
+            'welcome_message', 'thank_you_message',
+            'notify_on_upload', 'notification_email', 'cover_image',
         )
-    
+
+    def validate_event_type_id(self, value):
+        if not EventType.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Geçersiz etkinlik türü.")
+        return value
+
+    def validate_status(self, value):
+        allowed = {choice[0] for choice in Album.STATUS_CHOICES}
+        if value not in allowed:
+            raise serializers.ValidationError("Geçersiz albüm durumu.")
+        return value
+
     def update(self, instance, validated_data):
-        # Only allow updates if user is owner or has admin role
         user = self.context['request'].user
         if instance.owner != user:
-            # Check if user is collaborator with admin role
             try:
                 collaborator = instance.collaborators.get(user=user)
                 if collaborator.role != 'admin':
                     raise serializers.ValidationError("Bu albümü düzenleme yetkiniz yok.")
             except AlbumCollaborator.DoesNotExist:
                 raise serializers.ValidationError("Bu albümü düzenleme yetkiniz yok.")
-        
+
+        event_type_id = validated_data.pop('event_type_id', None)
+        if event_type_id:
+            instance.event_type_id = event_type_id
+
+        settings_keys = (
+            'welcome_message', 'thank_you_message',
+            'notify_on_upload', 'notification_email', 'cover_image',
+        )
+        settings_data = {
+            key: validated_data.pop(key)
+            for key in settings_keys
+            if key in validated_data
+        }
+        if settings_data:
+            settings, _ = AlbumSettings.objects.get_or_create(album=instance)
+            for key, value in settings_data.items():
+                setattr(settings, key, value)
+            settings.save()
+
         return super().update(instance, validated_data)
 
 
