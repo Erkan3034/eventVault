@@ -35,20 +35,20 @@ class UploadListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Upload
         fields = (
-            'id', 'original_filename', 'file_type', 'file_size_mb',
-            'uploader_display_name', 'caption', 'thumbnail_url', 'file_url',
+            'id', 'original_filename', 'file_type', 'mime_type', 'file_size_mb',
+            'uploader_display_name', 'caption', 'message', 'thumbnail_url', 'file_url',
             'view_count', 'like_count', 'status', 'created_at'
         )
         read_only_fields = ('id', 'file_size_mb', 'uploader_display_name', 'view_count', 'like_count', 'status', 'created_at')
     
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
-            return self.context['request'].build_absolute_uri(obj.thumbnail.url)
+            return obj.thumbnail.url
         return None
 
     def get_file_url(self, obj):
         if obj.file:
-            return self.context['request'].build_absolute_uri(obj.file.url)
+            return obj.file.url
         return None
 
 
@@ -80,12 +80,12 @@ class UploadDetailSerializer(serializers.ModelSerializer):
     
     def get_file_url(self, obj):
         if obj.file:
-            return self.context['request'].build_absolute_uri(obj.file.url)
+            return obj.file.url
         return None
     
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
-            return self.context['request'].build_absolute_uri(obj.thumbnail.url)
+            return obj.thumbnail.url
         return None
     
     def get_is_liked_by_user(self, obj):

@@ -18,6 +18,7 @@ from .serializers import (
 class UploadListView(generics.ListAPIView):
     serializer_class = UploadListSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['original_filename', 'caption', 'message', 'uploader_name']
     ordering_fields = ['created_at', 'view_count', 'like_count']

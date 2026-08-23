@@ -135,8 +135,9 @@ class Upload(models.Model):
     # ── Lifecycle ─────────────────────────────────────────────
 
     def save(self, *args, **kwargs):
-        if self.file and not self.pk:
-            # New upload only — process on first save
+        is_create = self._state.adding
+        if self.file and (is_create or not self.file_type):
+            # UUID pk is set before insert, so do not use `not self.pk` here
             self._process_new_upload()
         elif self.file and not self.file_size:
             self.file_size = self.file.size
