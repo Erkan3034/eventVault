@@ -1,203 +1,146 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
-import {
-    Bars3Icon,
-    XMarkIcon,
-    UserCircleIcon
-} from '@heroicons/react/24/outline';
+import BrandMark from './BrandMark';
 
 const Navbar = () => {
     const { user, isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileRef = useRef(null);
 
-    // Handles user logout
-    const handleLogout = async() => {
-        await logout(); // Call the logout function from AuthContext
-        navigate('/'); // Redirect to home page after logout
-        setIsProfileOpen(false); // Close profile dropdown
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
+        setIsProfileOpen(false);
+        setIsOpen(false);
     };
 
-    // Navigation items configuration
-    const navigation = [
-        { name: 'Ana Sayfa', href: '/', auth: false },
-        { name: 'Hakkında', href: '/about', auth: false },
-        { name: 'Dashboard', href: '/dashboard', auth: true },
-        { name: 'Albüm Oluştur', href: '/create-album', auth: true },
-    ];
+    useEffect(() => {
+        const onClick = (event) => {
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setIsProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', onClick);
+        return () => document.removeEventListener('mousedown', onClick);
+    }, []);
 
-    return ( <
-        nav className = "bg-white shadow-lg" >
-        <
-        div className = "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
-        <
-        div className = "flex justify-between h-16" > { /* Logo and Site Title */ } <
-        div className = "flex items-center" >
-        <
-        Link to = "/"
-        className = "flex-shrink-0 flex items-center" >
-        <
-        div className = "w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center" >
-        <
-        span className = "text-white font-bold text-lg" > E < /span> <
-        /div> <
-        span className = "ml-2 text-xl font-bold text-gray-900" > EventVault < /span> <
-        /Link> <
-        /div>
+    const linkClass = ({ isActive }) =>
+        `text-sm tracking-wide transition-colors ${
+            isActive ? 'text-gold-dark' : 'text-navy/70 hover:text-navy'
+        }`;
 
-        { /* Desktop Navigation */ } <
-        div className = "hidden md:flex items-center space-x-8" > { /* Render navigation links */ } {
-            navigation.map((item) => {
-                // Only show authenticated links if user is logged in
-                if (item.auth && !isAuthenticated) return null;
-                return ( <
-                    Link key = { item.name }
-                    to = { item.href }
-                    className = "text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors" >
-                    { item.name } <
-                    /Link>
-                );
-            })
-        }
+    const firstName = user && user.first_name ? user.first_name : 'Hesap';
 
-        { /* Conditional rendering for authenticated vs. unauthenticated users */ } {
-            isAuthenticated ? ( <
-                div className = "relative" > { /* User profile button */ } <
-                button onClick = {
-                    () => setIsProfileOpen(!isProfileOpen) }
-                className = "flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors" >
-                <
-                UserCircleIcon className = "h-6 w-6" / >
-                <
-                span className = "text-sm font-medium" > { user && user.first_name ? user.first_name : 'Kullanıcı' } <
-                /span> <
-                /button>
+    return (
+        <nav className="sticky top-0 z-40 border-b border-cream-dark/80 bg-cream/90 backdrop-blur-md">
+            <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                <BrandMark compact />
 
-                { /* Profile dropdown menu */ } {
-                    isProfileOpen && ( <
-                        div className = "absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" >
-                        <
-                        Link to = "/dashboard"
-                        className = "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick = {
-                            () => setIsProfileOpen(false) } >
-                        Dashboard <
-                        /Link> <
-                        Link to = "/profile"
-                        className = "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick = {
-                            () => setIsProfileOpen(false) } >
-                        Profil <
-                        /Link> <
-                        button onClick = { handleLogout }
-                        className = "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" >
-                        Çıkış Yap <
-                        /button> <
-                        /div>
-                    )
-                } <
-                /div>
-            ) : ( <
-                div className = "flex items-center space-x-4" > { /* Login and Register buttons for unauthenticated users */ } <
-                Link to = "/login"
-                className = "text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors" >
-                Giriş Yap <
-                /Link> <
-                Link to = "/register"
-                className = "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors" >
-                Kayıt Ol <
-                /Link> <
-                /div>
-            )
-        } <
-        /div>
+                <div className="hidden items-center gap-8 md:flex">
+                    <NavLink to="/" end className={linkClass}>Ana Sayfa</NavLink>
+                    <NavLink to="/about" className={linkClass}>Hakkında</NavLink>
+                    {isAuthenticated && (
+                        <>
+                            <NavLink to="/dashboard" className={linkClass}>Albümlerim</NavLink>
+                            <NavLink to="/create-album" className={linkClass}>Albüm Oluştur</NavLink>
+                        </>
+                    )}
+                </div>
 
-        { /* Mobile menu button */ } <
-        div className = "md:hidden flex items-center" >
-        <
-        button onClick = {
-            () => setIsOpen(!isOpen) }
-        className = "text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600" >
-        {
-            isOpen ? ( <
-                XMarkIcon className = "h-6 w-6" / >
-            ) : ( <
-                Bars3Icon className = "h-6 w-6" / >
-            )
-        } <
-        /button> <
-        /div> <
-        /div> <
-        /div>
+                <div className="hidden items-center gap-3 md:flex">
+                    {isAuthenticated ? (
+                        <div className="relative" ref={profileRef}>
+                            <button
+                                type="button"
+                                onClick={() => setIsProfileOpen((open) => !open)}
+                                className="flex items-center gap-2 rounded-full border border-cream-dark bg-white px-3 py-1.5 text-sm text-navy"
+                            >
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-navy font-display text-gold">
+                                    {firstName.charAt(0).toUpperCase()}
+                                </span>
+                                {firstName}
+                            </button>
+                            {isProfileOpen && (
+                                <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-xl border border-cream-dark bg-white py-1 shadow-navy">
+                                    <Link
+                                        to="/dashboard"
+                                        onClick={() => setIsProfileOpen(false)}
+                                        className="block px-4 py-2 text-sm text-navy hover:bg-cream"
+                                    >
+                                        Albümlerim
+                                    </Link>
+                                    <Link
+                                        to="/profile"
+                                        onClick={() => setIsProfileOpen(false)}
+                                        className="block px-4 py-2 text-sm text-navy hover:bg-cream"
+                                    >
+                                        Profil
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={handleLogout}
+                                        className="block w-full px-4 py-2 text-left text-sm text-navy/70 hover:bg-cream"
+                                    >
+                                        Çıkış Yap
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <>
+                            <Link to="/login" className="text-sm text-navy/70 hover:text-navy">
+                                Giriş Yap
+                            </Link>
+                            <Link to="/register" className="btn-primary px-5 py-2 text-sm">
+                                Kayıt Ol
+                            </Link>
+                        </>
+                    )}
+                </div>
 
-        { /* Mobile Navigation (conditionally rendered) */ } {
-            isOpen && ( <
-                div className = "md:hidden" >
-                <
-                div className = "px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t" > { /* Render mobile navigation links */ } {
-                    navigation.map((item) => {
-                        if (item.auth && !isAuthenticated) return null;
-                        return ( <
-                            Link key = { item.name }
-                            to = { item.href }
-                            className = "text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                            onClick = {
-                                () => setIsOpen(false) } >
-                            { item.name } <
-                            /Link>
-                        );
-                    })
-                }
+                <button
+                    type="button"
+                    className="text-navy md:hidden"
+                    onClick={() => setIsOpen((open) => !open)}
+                    aria-label={isOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+                >
+                    {isOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+                </button>
+            </div>
 
-                { /* Conditional rendering for authenticated vs. unauthenticated users in mobile menu */ } {
-                    isAuthenticated ? ( <
-                        div className = "border-t pt-4 mt-4" >
-                        <
-                        div className = "px-3 py-2 text-sm text-gray-500" >
-                        Hoş geldin, { user && user.first_name ? user.first_name : 'Kullanıcı' } <
-                        /div> <
-                        Link to = "/dashboard"
-                        className = "text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                        onClick = {
-                            () => setIsOpen(false) } >
-                        Dashboard <
-                        /Link> <
-                        Link to = "/profile"
-                        className = "text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                        onClick = {
-                            () => setIsOpen(false) } >
-                        Profil <
-                        /Link> <
-                        button onClick = { handleLogout }
-                        className = "text-gray-700 hover:text-blue-600 block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors" >
-                        Çıkış Yap <
-                        /button> <
-                        /div>
-                    ) : ( <
-                        div className = "border-t pt-4 mt-4 space-y-2" >
-                        <
-                        Link to = "/login"
-                        className = "text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                        onClick = {
-                            () => setIsOpen(false) } >
-                        Giriş Yap <
-                        /Link> <
-                        Link to = "/register"
-                        className = "bg-blue-600 hover:bg-blue-700 text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                        onClick = {
-                            () => setIsOpen(false) } >
-                        Kayıt Ol <
-                        /Link> <
-                        /div>
-                    )
-                } <
-                /div> <
-                /div>
-            )
-        } <
-        /nav>
+            {isOpen && (
+                <div className="border-t border-cream-dark bg-cream px-4 py-4 md:hidden">
+                    <div className="flex flex-col gap-3">
+                        <NavLink to="/" end className={linkClass} onClick={() => setIsOpen(false)}>Ana Sayfa</NavLink>
+                        <NavLink to="/about" className={linkClass} onClick={() => setIsOpen(false)}>Hakkında</NavLink>
+                        {isAuthenticated && (
+                            <>
+                                <NavLink to="/dashboard" className={linkClass} onClick={() => setIsOpen(false)}>Albümlerim</NavLink>
+                                <NavLink to="/create-album" className={linkClass} onClick={() => setIsOpen(false)}>Albüm Oluştur</NavLink>
+                                <NavLink to="/profile" className={linkClass} onClick={() => setIsOpen(false)}>Profil</NavLink>
+                                <button type="button" onClick={handleLogout} className="text-left text-sm text-navy/70">
+                                    Çıkış Yap
+                                </button>
+                            </>
+                        )}
+                        {!isAuthenticated && (
+                            <div className="flex gap-3 pt-2">
+                                <Link to="/login" className="btn-secondary flex-1 py-2 text-sm" onClick={() => setIsOpen(false)}>
+                                    Giriş Yap
+                                </Link>
+                                <Link to="/register" className="btn-primary flex-1 py-2 text-sm" onClick={() => setIsOpen(false)}>
+                                    Kayıt Ol
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </nav>
     );
 };
 

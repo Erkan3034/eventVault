@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -18,15 +18,12 @@ import AdminPanelPage from './pages/AdminPanelPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import PageLoader from './components/PageLoader';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                Yükleniyor...
-            </div>
-        );
+        return <PageLoader />;
     }
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
@@ -39,14 +36,15 @@ const GuestUploadRedirect = () => {
     return <Navigate to={`/upload/${accessCode}`} replace />;
 };
 
-function App() {
+function AppLayout() {
+    const { pathname } = useLocation();
+    const bare = pathname === '/login' || pathname === '/register';
+
     return (
-        <AuthProvider>
-            <Router>
-                <div className="min-h-screen bg-gray-50">
-                    <Navbar />
-                    <main>
-                        <Routes>
+        <div className="flex min-h-screen flex-col bg-cream">
+            {!bare && <Navbar />}
+            <main className="flex-1">
+                <Routes>
                             <Route path="/" element={<HomePage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
@@ -79,13 +77,21 @@ function App() {
                             />
                         </Routes>
                     </main>
-                    <Footer />
-                </div>
+            {!bare && <Footer />}
+        </div>
+    );
+}
+
+function App() {
+    return (
+        <AuthProvider>
+            <Router>
+                <AppLayout />
                 <ToastContainer
                     position="top-right"
                     autoClose={5000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
+                    hideProgressBar
+                    newestOnTop
                     closeOnClick
                     rtl={false}
                     pauseOnFocusLoss

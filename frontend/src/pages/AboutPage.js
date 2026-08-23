@@ -1,36 +1,37 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const AboutPage = () => {
-    return ( <
-        div className = "max-w-4xl mx-auto py-12" >
-        <
-        h2 className = "text-3xl font-bold mb-8" > Hakkımızda < /h2> <
-        div className = "prose max-w-none" >
-        <
-        p className = "text-lg mb-6" >
-        EventVault, etkinliklerinizde çekilen fotoğraf, video ve ses dosyalarını kolayca toplamak için tasarlanmış modern bir dijital albüm platformudur. <
-        /p> <
-        h3 className = "text-xl font-semibold mb-4" > Misyonumuz < /h3> <
-        p className = "mb-6" >
-        Özel anlarınızı kaybetmemek ve sevdiklerinizle paylaşmak için güvenli, kullanıcı dostu ve yenilikçi çözümler sunmak. <
-        /p> <
-        h3 className = "text-xl font-semibold mb-4" > Özellikler < /h3> <
-        ul className = "list-disc pl-6 mb-6" >
-        <
-        li > QR kod ile kolay paylaşım < /li> <
-        li > Anonim dosya yükleme < /li> <
-        li > Çoklu medya desteği < /li> <
-        li > Güvenli ve özel albümler < /li> <
-        li > İşbirlikçi yönetim < /li> <
-        /ul> <
-        h3 className = "text-xl font-semibold mb-4" > İletişim < /h3> <
-        p className = "mb-4" >
-        Sorularınız için: < a href = "mailto:info@eventvault.com"
-        className = "text-blue-600" > info @eventvault.com < /a> <
-        /p> <
-        /div> <
-        /div>
-    );
-};
+const AboutPage = () => (
+    <div className="page max-w-3xl">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-gold-dark">Hakkımızda</p>
+        <h1 className="mt-3 font-display text-5xl text-navy">Anılar dağılmasın diye.</h1>
+        <div className="gold-divider mx-0" />
+        <div className="space-y-6 text-[17px] leading-relaxed text-navy/75">
+            <p>
+                EventVault, etkinlikte çekilen fotoğraf, video ve sesleri tek bir albümde toplamak için tasarlandı.
+                Misafirleriniz hesap açmaz; QR kodu okutur, anısını bırakır.
+            </p>
+            <p>
+                Amacımız gösterişli bir sosyal ağ değil: sakin, güvenli ve kalıcı bir kasa. Albümünüz size aittir;
+                gizliliği, süreyi ve yükleme kurallarını siz belirlersiniz.
+            </p>
+            <ul className="space-y-2 text-base">
+                <li className="flex gap-3"><span className="text-gold">—</span> QR kod ile kolay paylaşım</li>
+                <li className="flex gap-3"><span className="text-gold">—</span> Kayıtsız dosya yükleme</li>
+                <li className="flex gap-3"><span className="text-gold">—</span> Fotoğraf, video ve ses</li>
+                <li className="flex gap-3"><span className="text-gold">—</span> Özel veya herkese açık albümler</li>
+            </ul>
+            <p>
+                Yazışmak için:{' '}
+                <a href="mailto:info@eventvault.com" className="text-gold-dark hover:underline">
+                    info@eventvault.com
+                </a>
+            </p>
+        </div>
+        <Link to="/register" className="btn-primary mt-10 inline-flex">
+            Albüm oluşturmaya başla
+        </Link>
+    </div>
+);
 
 export default AboutPage;

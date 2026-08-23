@@ -7,22 +7,19 @@ module.exports = {
         extend: {
             // ── Mirra Brand Colors ─────────────────────────────────
             colors: {
-                // Navy — güven, kalıcılık
                 navy: {
-                    DEFAULT: '#1A2340',
-                    light: '#243058',
+                    DEFAULT: '#1A2748',
+                    light: '#2A3868',
                     dark:  '#111827',
                 },
-                // Antik Altın — lüks, özellik, anı
                 gold: {
-                    DEFAULT: '#B8975A',
-                    light:   '#D4B07A',
-                    dark:    '#8A6E3A',
+                    DEFAULT: '#C4A05F',
+                    light:   '#D9B87E',
+                    dark:    '#93753C',
                 },
-                // Krem — sıcaklık, nostalji
                 cream: {
-                    DEFAULT: '#FDF8F0',
-                    dark:    '#F5EDDF',
+                    DEFAULT: '#FEF9F2',
+                    dark:    '#F6EDDF',
                 },
             },
 
@@ -46,10 +43,10 @@ module.exports = {
 
             // ── Box shadow ────────────────────────────────────────
             boxShadow: {
-                'gold-sm': '0 2px 8px 0 rgba(184,151,90,0.20)',
-                'gold':    '0 4px 20px 0 rgba(184,151,90,0.35)',
-                'gold-lg': '0 8px 40px 0 rgba(184,151,90,0.45)',
-                'navy':    '0 4px 24px 0 rgba(26,35,64,0.25)',
+                'gold-sm': '0 2px 8px 0 rgba(196,160,95,0.24)',
+                'gold':    '0 4px 20px 0 rgba(196,160,95,0.38)',
+                'gold-lg': '0 8px 40px 0 rgba(196,160,95,0.46)',
+                'navy':    '0 4px 24px 0 rgba(26,39,72,0.25)',
             },
 
             // ── Animations ────────────────────────────────────────
@@ -83,8 +80,8 @@ module.exports = {
                     '100%': { transform: 'translateX(0)',    opacity: '1' },
                 },
                 pulseGold: {
-                    '0%, 100%': { boxShadow: '0 0 0 0 rgba(184,151,90,0.5)' },
-                    '50%':      { boxShadow: '0 0 0 10px rgba(184,151,90,0)' },
+                    '0%, 100%': { boxShadow: '0 0 0 0 rgba(196,160,95,0.5)' },
+                    '50%':      { boxShadow: '0 0 0 10px rgba(196,160,95,0)' },
                 },
                 float: {
                     '0%, 100%': { transform: 'translateY(0)' },

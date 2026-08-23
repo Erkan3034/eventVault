@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import PageLoader from '../components/PageLoader';
 
 const STATUS_OPTIONS = [
     { value: 'draft', label: 'Taslak' },
@@ -152,119 +153,64 @@ const EditAlbumPage = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                Yükleniyor...
-            </div>
-        );
-    }
+    if (loading) return <PageLoader />;
 
     return (
-        <div className="max-w-3xl mx-auto py-12 px-4">
-            <div className="mb-6 flex items-center justify-between">
+        <div className="page max-w-3xl">
+            <div className="mb-8 flex items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Albümü Düzenle</h1>
-                    <p className="text-sm text-gray-600 mt-1">Bilgileri, gizliliği ve davetli karşılama metinlerini güncelle.</p>
+                    <Link to={`/album/${id}`} className="text-xs uppercase tracking-[0.16em] text-gold-dark hover:underline">
+                        Albüme dön
+                    </Link>
+                    <h1 className="mt-2 font-display text-4xl text-navy">Albümü düzenle</h1>
+                    <p className="mt-2 text-sm text-navy/55">Bilgiler, gizlilik ve davetli metinleri.</p>
                 </div>
-                <Link to={`/album/${id}`} className="text-blue-600 hover:underline text-sm">
-                    Albüme dön
-                </Link>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="card space-y-6 p-6 sm:p-8">
                 <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Başlık</label>
-                    <input
-                        id="title"
-                        name="title"
-                        value={form.title}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    />
+                    <label htmlFor="title" className="field-label">Başlık</label>
+                    <input id="title" name="title" value={form.title} onChange={handleChange} required className="input" />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div>
-                        <label htmlFor="event_type_id" className="block text-sm font-medium text-gray-700">Etkinlik türü</label>
-                        <select
-                            id="event_type_id"
-                            name="event_type_id"
-                            value={form.event_type_id}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
-                        >
+                        <label htmlFor="event_type_id" className="field-label">Etkinlik türü</label>
+                        <select id="event_type_id" name="event_type_id" value={form.event_type_id} onChange={handleChange} required className="input">
                             <option value="">Seçiniz</option>
                             {eventTypes.map((type) => (
-                                <option key={type.id} value={type.id}>
-                                    {type.name_tr || type.name}
-                                </option>
+                                <option key={type.id} value={type.id}>{type.name_tr || type.name}</option>
                             ))}
                         </select>
                     </div>
                     <div>
-                        <label htmlFor="event_date" className="block text-sm font-medium text-gray-700">Etkinlik tarihi</label>
-                        <input
-                            id="event_date"
-                            type="date"
-                            name="event_date"
-                            value={form.event_date}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
+                        <label htmlFor="event_date" className="field-label">Etkinlik tarihi</label>
+                        <input id="event_date" type="date" name="event_date" value={form.event_date} onChange={handleChange} required className="input" />
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="event_location" className="block text-sm font-medium text-gray-700">Lokasyon</label>
-                    <input
-                        id="event_location"
-                        name="event_location"
-                        value={form.event_location}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    />
+                    <label htmlFor="event_location" className="field-label">Lokasyon</label>
+                    <input id="event_location" name="event_location" value={form.event_location} onChange={handleChange} className="input" />
                 </div>
 
                 <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Açıklama</label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        rows={3}
-                        value={form.description}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    />
+                    <label htmlFor="description" className="field-label">Açıklama</label>
+                    <textarea id="description" name="description" rows={3} value={form.description} onChange={handleChange} className="input" />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div>
-                        <label htmlFor="privacy" className="block text-sm font-medium text-gray-700">Gizlilik</label>
-                        <select
-                            id="privacy"
-                            name="privacy"
-                            value={form.privacy}
-                            onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
-                        >
+                        <label htmlFor="privacy" className="field-label">Gizlilik</label>
+                        <select id="privacy" name="privacy" value={form.privacy} onChange={handleChange} className="input">
                             <option value="private">Özel</option>
                             <option value="public">Herkese açık</option>
                             <option value="password_protected">Şifreli</option>
                         </select>
                     </div>
                     <div>
-                        <label htmlFor="status" className="block text-sm font-medium text-gray-700">Durum</label>
-                        <select
-                            id="status"
-                            name="status"
-                            value={form.status}
-                            onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
-                        >
+                        <label htmlFor="status" className="field-label">Durum</label>
+                        <select id="status" name="status" value={form.status} onChange={handleChange} className="input">
                             {STATUS_OPTIONS.map((option) => (
                                 <option key={option.value} value={option.value}>{option.label}</option>
                             ))}
@@ -272,148 +218,64 @@ const EditAlbumPage = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                     <div>
-                        <label htmlFor="max_files_per_user" className="block text-sm font-medium text-gray-700">Kişi başı dosya</label>
-                        <input
-                            id="max_files_per_user"
-                            type="number"
-                            min="1"
-                            name="max_files_per_user"
-                            value={form.max_files_per_user}
-                            onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
+                        <label htmlFor="max_files_per_user" className="field-label">Kişi başı dosya</label>
+                        <input id="max_files_per_user" type="number" min="1" name="max_files_per_user" value={form.max_files_per_user} onChange={handleChange} className="input" />
                     </div>
                     <div>
-                        <label htmlFor="max_file_size_mb" className="block text-sm font-medium text-gray-700">Maks. dosya (MB)</label>
-                        <input
-                            id="max_file_size_mb"
-                            type="number"
-                            min="1"
-                            name="max_file_size_mb"
-                            value={form.max_file_size_mb}
-                            onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
+                        <label htmlFor="max_file_size_mb" className="field-label">Maks. dosya (MB)</label>
+                        <input id="max_file_size_mb" type="number" min="1" name="max_file_size_mb" value={form.max_file_size_mb} onChange={handleChange} className="input" />
                     </div>
                     <div>
-                        <label htmlFor="expires_at" className="block text-sm font-medium text-gray-700">Son yükleme tarihi</label>
-                        <input
-                            id="expires_at"
-                            type="date"
-                            name="expires_at"
-                            value={form.expires_at}
-                            onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
+                        <label htmlFor="expires_at" className="field-label">Son yükleme</label>
+                        <input id="expires_at" type="date" name="expires_at" value={form.expires_at} onChange={handleChange} className="input" />
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <label className="inline-flex items-center text-sm text-gray-700">
-                        <input
-                            type="checkbox"
-                            name="require_approval"
-                            checked={form.require_approval}
-                            onChange={handleChange}
-                            className="mr-2"
-                        />
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <label className="inline-flex items-center text-sm text-navy/70">
+                        <input type="checkbox" name="require_approval" checked={form.require_approval} onChange={handleChange} className="mr-2 accent-gold" />
                         Yüklemeler onay beklesin
                     </label>
-                    <label className="inline-flex items-center text-sm text-gray-700">
-                        <input
-                            type="checkbox"
-                            name="enable_comments"
-                            checked={form.enable_comments}
-                            onChange={handleChange}
-                            className="mr-2"
-                        />
+                    <label className="inline-flex items-center text-sm text-navy/70">
+                        <input type="checkbox" name="enable_comments" checked={form.enable_comments} onChange={handleChange} className="mr-2 accent-gold" />
                         Yorumlara izin ver
                     </label>
-                    <label className="inline-flex items-center text-sm text-gray-700">
-                        <input
-                            type="checkbox"
-                            name="notify_on_upload"
-                            checked={form.notify_on_upload}
-                            onChange={handleChange}
-                            className="mr-2"
-                        />
+                    <label className="inline-flex items-center text-sm text-navy/70">
+                        <input type="checkbox" name="notify_on_upload" checked={form.notify_on_upload} onChange={handleChange} className="mr-2 accent-gold" />
                         Yeni yüklemede bildir
                     </label>
                 </div>
 
                 <div>
-                    <label htmlFor="notification_email" className="block text-sm font-medium text-gray-700">Bildirim e-postası</label>
-                    <input
-                        id="notification_email"
-                        type="email"
-                        name="notification_email"
-                        value={form.notification_email}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    />
+                    <label htmlFor="notification_email" className="field-label">Bildirim e-postası</label>
+                    <input id="notification_email" type="email" name="notification_email" value={form.notification_email} onChange={handleChange} className="input" />
                 </div>
-
                 <div>
-                    <label htmlFor="welcome_message" className="block text-sm font-medium text-gray-700">Karşılama mesajı</label>
-                    <textarea
-                        id="welcome_message"
-                        name="welcome_message"
-                        rows={2}
-                        value={form.welcome_message}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Davetlilerin yükleme sayfasında göreceği metin"
-                    />
+                    <label htmlFor="welcome_message" className="field-label">Karşılama mesajı</label>
+                    <textarea id="welcome_message" name="welcome_message" rows={2} value={form.welcome_message} onChange={handleChange} className="input" placeholder="Davetlilerin göreceği metin" />
                 </div>
-
                 <div>
-                    <label htmlFor="thank_you_message" className="block text-sm font-medium text-gray-700">Teşekkür mesajı</label>
-                    <textarea
-                        id="thank_you_message"
-                        name="thank_you_message"
-                        rows={2}
-                        value={form.thank_you_message}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Yükleme sonrası gösterilecek metin"
-                    />
+                    <label htmlFor="thank_you_message" className="field-label">Teşekkür mesajı</label>
+                    <textarea id="thank_you_message" name="thank_you_message" rows={2} value={form.thank_you_message} onChange={handleChange} className="input" placeholder="Yükleme sonrası metin" />
                 </div>
-
                 <div>
-                    <label htmlFor="cover_image" className="block text-sm font-medium text-gray-700">Kapak görseli</label>
-                    <input
-                        id="cover_image"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverChange}
-                        className="mt-1 block w-full text-sm"
-                    />
+                    <label htmlFor="cover_image" className="field-label">Kapak görseli</label>
+                    <input id="cover_image" type="file" accept="image/*" onChange={handleCoverChange} className="input file:mr-3 file:rounded-md file:border-0 file:bg-cream-dark file:px-3 file:py-1.5 file:text-sm" />
                     {coverPreview && (
-                        <img src={coverPreview} alt="Kapak önizleme" className="mt-3 h-32 rounded object-cover" />
+                        <img src={coverPreview} alt="Kapak önizleme" className="mt-3 h-36 w-full rounded-lg object-cover" />
                     )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t">
-                    <button
-                        type="button"
-                        onClick={handleDelete}
-                        disabled={deleting}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
-                    >
-                        {deleting ? 'Siliniyor...' : 'Albümü sil'}
+                <div className="flex flex-col gap-3 border-t border-cream-dark pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <button type="button" onClick={handleDelete} disabled={deleting} className="text-sm text-red-700 hover:underline disabled:opacity-50">
+                        {deleting ? 'Siliniyor…' : 'Albümü sil'}
                     </button>
                     <div className="flex gap-3">
-                        <Link to={`/album/${id}`} className="px-4 py-2 rounded-md border text-sm">
-                            Vazgeç
-                        </Link>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="bg-blue-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-                        >
-                            {saving ? 'Kaydediliyor...' : 'Değişiklikleri kaydet'}
+                        <Link to={`/album/${id}`} className="btn-secondary py-2.5 text-sm">Vazgeç</Link>
+                        <button type="submit" disabled={saving} className="btn-primary py-2.5 text-sm disabled:opacity-50">
+                            {saving ? 'Kaydediliyor…' : 'Kaydet'}
                         </button>
                     </div>
                 </div>

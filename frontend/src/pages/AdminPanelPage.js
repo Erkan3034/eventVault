@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import PageLoader from '../components/PageLoader';
 
 const AdminPanelPage = () => {
     const [albums, setAlbums] = useState([]);
@@ -8,131 +8,89 @@ const AdminPanelPage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchData();
-        // eslint-disable-next-line
+        setAlbums([
+            { id: 1, title: 'Düğün Albümü', owner: 'admin', status: 'active' },
+            { id: 2, title: 'Mezuniyet', owner: 'user1', status: 'completed' },
+        ]);
+        setUsers([
+            { id: 1, name: 'admin', email: 'admin@example.com' },
+            { id: 2, name: 'user1', email: 'user1@example.com' },
+        ]);
+        setReports([
+            { id: 1, upload: 'IMG_1234.jpg', reason: 'Uygunsuz içerik', status: 'pending' },
+        ]);
+        setLoading(false);
     }, []);
 
-    const fetchData = async() => {
-        setLoading(true);
-        try {
-            // TODO: Replace with actual API endpoints
-            setAlbums([
-                { id: 1, title: 'Düğün Albümü', owner: 'admin', status: 'active' },
-                { id: 2, title: 'Mezuniyet', owner: 'user1', status: 'completed' }
-            ]);
-            setUsers([
-                { id: 1, name: 'admin', email: 'admin@example.com' },
-                { id: 2, name: 'user1', email: 'user1@example.com' }
-            ]);
-            setReports([
-                { id: 1, upload: 'IMG_1234.jpg', reason: 'Uygunsuz içerik', status: 'pending' }
-            ]);
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (loading) return <PageLoader />;
 
-    if (loading) {
-        return ( <
-            div className = "min-h-screen flex items-center justify-center" >
-            Yükleniyor... <
-            /div>
-        );
-    }
+    const Table = ({ columns, rows, render }) => (
+        <div className="card overflow-hidden">
+            <table className="min-w-full text-left text-sm">
+                <thead className="bg-cream-dark/60 text-[11px] uppercase tracking-[0.14em] text-navy/50">
+                    <tr>
+                        {columns.map((col) => (
+                            <th key={col} className="px-4 py-3 font-medium">{col}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-cream-dark text-navy/80">
+                    {rows.map(render)}
+                </tbody>
+            </table>
+        </div>
+    );
 
-    return ( <
-        div className = "max-w-5xl mx-auto py-12" >
-        <
-        h2 className = "text-2xl font-bold mb-8" > Admin Paneli < /h2>
+    return (
+        <div className="page">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-gold-dark">Yönetim</p>
+            <h1 className="mt-2 font-display text-4xl text-navy">Admin paneli</h1>
+            <p className="mt-2 text-sm text-navy/50">Örnek veriler — gerçek API henüz bağlı değil.</p>
 
-        <
-        div className = "mb-8" >
-        <
-        h3 className = "text-lg font-semibold mb-2" > Albümler < /h3> <
-        table className = "min-w-full bg-white border rounded" >
-        <
-        thead >
-        <
-        tr >
-        <
-        th className = "px-4 py-2 border" > Başlık < /th> <
-        th className = "px-4 py-2 border" > Sahibi < /th> <
-        th className = "px-4 py-2 border" > Durum < /th> <
-        /tr> <
-        /thead> <
-        tbody > {
-            albums.map(album => ( <
-                tr key = { album.id }
-                className = "border-t" >
-                <
-                td className = "px-4 py-2 border" > { album.title } < /td> <
-                td className = "px-4 py-2 border" > { album.owner } < /td> <
-                td className = "px-4 py-2 border" > { album.status } < /td> <
-                /tr>
-            ))
-        } <
-        /tbody> <
-        /table> <
-        /div>
+            <section className="mt-10">
+                <h2 className="mb-3 font-display text-2xl text-navy">Albümler</h2>
+                <Table
+                    columns={['Başlık', 'Sahibi', 'Durum']}
+                    rows={albums}
+                    render={(album) => (
+                        <tr key={album.id}>
+                            <td className="px-4 py-3">{album.title}</td>
+                            <td className="px-4 py-3">{album.owner}</td>
+                            <td className="px-4 py-3">{album.status}</td>
+                        </tr>
+                    )}
+                />
+            </section>
 
-        <
-        div className = "mb-8" >
-        <
-        h3 className = "text-lg font-semibold mb-2" > Kullanıcılar < /h3> <
-        table className = "min-w-full bg-white border rounded" >
-        <
-        thead >
-        <
-        tr >
-        <
-        th className = "px-4 py-2 border" > Ad < /th> <
-        th className = "px-4 py-2 border" > E - posta < /th> <
-        /tr> <
-        /thead> <
-        tbody > {
-            users.map(user => ( <
-                tr key = { user.id }
-                className = "border-t" >
-                <
-                td className = "px-4 py-2 border" > { user.name } < /td> <
-                td className = "px-4 py-2 border" > { user.email } < /td> <
-                /tr>
-            ))
-        } <
-        /tbody> <
-        /table> <
-        /div>
+            <section className="mt-10">
+                <h2 className="mb-3 font-display text-2xl text-navy">Kullanıcılar</h2>
+                <Table
+                    columns={['Ad', 'E-posta']}
+                    rows={users}
+                    render={(user) => (
+                        <tr key={user.id}>
+                            <td className="px-4 py-3">{user.name}</td>
+                            <td className="px-4 py-3">{user.email}</td>
+                        </tr>
+                    )}
+                />
+            </section>
 
-        <
-        div >
-        <
-        h3 className = "text-lg font-semibold mb-2" > Raporlanan İçerikler < /h3> <
-        table className = "min-w-full bg-white border rounded" >
-        <
-        thead >
-        <
-        tr >
-        <
-        th className = "px-4 py-2 border" > Dosya < /th> <
-        th className = "px-4 py-2 border" > Sebep < /th> <
-        th className = "px-4 py-2 border" > Durum < /th> <
-        /tr> <
-        /thead> <
-        tbody > {
-            reports.map(report => ( <
-                tr key = { report.id }
-                className = "border-t" >
-                <
-                td className = "px-4 py-2 border" > { report.upload } < /td> <
-                td className = "px-4 py-2 border" > { report.reason } < /td> <
-                td className = "px-4 py-2 border" > { report.status } < /td> <
-                /tr>
-            ))
-        } <
-        /tbody> <
-        /table> <
-        /div> <
-        /div>
+            <section className="mt-10">
+                <h2 className="mb-3 font-display text-2xl text-navy">Raporlar</h2>
+                <Table
+                    columns={['Dosya', 'Sebep', 'Durum']}
+                    rows={reports}
+                    render={(report) => (
+                        <tr key={report.id}>
+                            <td className="px-4 py-3">{report.upload}</td>
+                            <td className="px-4 py-3">{report.reason}</td>
+                            <td className="px-4 py-3">{report.status}</td>
+                        </tr>
+                    )}
+                />
+            </section>
+        </div>
     );
 };
 

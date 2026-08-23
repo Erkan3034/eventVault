@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import PageLoader from '../components/PageLoader';
 
 const ProfilePage = () => {
     const { user, updateProfile } = useAuth();
@@ -9,7 +9,7 @@ const ProfilePage = () => {
         first_name: '',
         last_name: '',
         email: '',
-        phone: ''
+        phone: '',
     });
     const [loading, setLoading] = useState(false);
 
@@ -19,22 +19,22 @@ const ProfilePage = () => {
                 first_name: user.first_name || '',
                 last_name: user.last_name || '',
                 email: user.email || '',
-                phone: user.phone || ''
+                phone: user.phone || '',
             });
         }
     }, [user]);
 
     const handleChange = (e) => {
-        setForm({...form, [e.target.name]: e.target.value });
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             const result = await updateProfile(form);
             if (result.success) {
-                toast.success('Profil güncellendi!');
+                toast.success('Profil güncellendi.');
             } else {
                 toast.error(result.error || 'Güncelleme başarısız');
             }
@@ -45,74 +45,38 @@ const ProfilePage = () => {
         }
     };
 
-    if (!user) {
-        return <div className = "min-h-screen flex items-center justify-center" > Yükleniyor... < /div>;
-    }
+    if (!user) return <PageLoader />;
 
-    return ( <
-        div className = "max-w-2xl mx-auto py-12" >
-        <
-        h2 className = "text-2xl font-bold mb-8" > Profil < /h2> <
-        div className = "bg-white shadow rounded-lg p-6" >
-        <
-        form onSubmit = { handleSubmit }
-        className = "space-y-6" >
-        <
-        div className = "grid grid-cols-1 md:grid-cols-2 gap-6" >
-        <
-        div >
-        <
-        label className = "block text-sm font-medium text-gray-700" > Ad < /label> <
-        input type = "text"
-        name = "first_name"
-        value = { form.first_name }
-        onChange = { handleChange }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
-        >
-        <
-        /div> <
-        div >
-        <
-        label className = "block text-sm font-medium text-gray-700" > Soyad < /label> <
-        input type = "text"
-        name = "last_name"
-        value = { form.last_name }
-        onChange = { handleChange }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
-        >
-        <
-        /div> <
-        /div> <
-        div >
-        <
-        label className = "block text-sm font-medium text-gray-700" > E - posta < /label> <
-        input type = "email"
-        name = "email"
-        value = { form.email }
-        onChange = { handleChange }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
-        >
-        <
-        /div> <
-        div >
-        <
-        label className = "block text-sm font-medium text-gray-700" > Telefon < /label> <
-        input type = "tel"
-        name = "phone"
-        value = { form.phone }
-        onChange = { handleChange }
-        className = "mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" /
-        >
-        <
-        /div> <
-        button type = "submit"
-        disabled = { loading }
-        className = "w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50" >
-        { loading ? 'Güncelleniyor...' : 'Güncelle' } <
-        /button> <
-        /form> <
-        /div> <
-        /div>
+    return (
+        <div className="page max-w-xl">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-gold-dark">Hesap</p>
+            <h1 className="mt-2 font-display text-4xl text-navy">Profil</h1>
+            <p className="mt-2 text-navy/55">Adınız albümlerde ve bildirimlerde görünür.</p>
+
+            <form onSubmit={handleSubmit} className="card mt-8 space-y-5 p-6 sm:p-8">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                        <label htmlFor="first_name" className="field-label">Ad</label>
+                        <input id="first_name" name="first_name" value={form.first_name} onChange={handleChange} className="input" />
+                    </div>
+                    <div>
+                        <label htmlFor="last_name" className="field-label">Soyad</label>
+                        <input id="last_name" name="last_name" value={form.last_name} onChange={handleChange} className="input" />
+                    </div>
+                </div>
+                <div>
+                    <label htmlFor="email" className="field-label">E-posta</label>
+                    <input id="email" type="email" name="email" value={form.email} onChange={handleChange} className="input" />
+                </div>
+                <div>
+                    <label htmlFor="phone" className="field-label">Telefon</label>
+                    <input id="phone" type="tel" name="phone" value={form.phone} onChange={handleChange} className="input" />
+                </div>
+                <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
+                    {loading ? 'Kaydediliyor…' : 'Kaydet'}
+                </button>
+            </form>
+        </div>
     );
 };
 
