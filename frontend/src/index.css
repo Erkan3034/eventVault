@@ -231,6 +231,23 @@
     .hover-reveal:hover .hover-reveal-overlay {
         @apply opacity-100;
     }
+
+    .reveal {
+        animation: slideUp 0.7s ease-out both;
+    }
+    .photo-grade {
+        filter: saturate(0.88) contrast(1.05);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-float-slow,
+    .animate-ken-burns,
+    .animate-pulse-gold,
+    .reveal {
+        animation: none !important;
+    }
 }
 
 /* ── Custom scrollbar ─────────────────────────────────────── */

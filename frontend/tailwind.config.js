@@ -57,6 +57,8 @@ module.exports = {
                 'slide-left': 'slideLeft 0.35s ease-out',
                 'pulse-gold': 'pulseGold 2s ease-in-out infinite',
                 'float':      'float 3s ease-in-out infinite',
+                'float-slow': 'float 7s ease-in-out infinite',
+                'ken-burns':  'kenBurns 22s ease-in-out infinite alternate',
                 'spin-slow':  'spin 3s linear infinite',
                 'heart-pop':  'heartPop 0.4s cubic-bezier(0.34,1.56,0.64,1)',
                 'confetti':   'confettiFall 1s ease-out forwards',
@@ -86,6 +88,10 @@ module.exports = {
                 float: {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%':      { transform: 'translateY(-8px)' },
+                },
+                kenBurns: {
+                    '0%':   { transform: 'scale(1) translate(0, 0)' },
+                    '100%': { transform: 'scale(1.08) translate(-1.5%, -1%)' },
                 },
                 heartPop: {
                     '0%':   { transform: 'scale(1)' },

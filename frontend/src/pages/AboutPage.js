@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { PHOTOS } from '../components/HeroScene';
 
 const AboutPage = () => (
     <div className="page max-w-3xl">
+        <div className="mb-10 grid grid-cols-3 gap-2">
+            {[PHOTOS.wedding, PHOTOS.table, PHOTOS.rings].map((src) => (
+                <img key={src} src={src} alt="" className="photo-grade h-28 w-full rounded-xl object-cover md:h-36" />
+            ))}
+        </div>
         <p className="text-[11px] uppercase tracking-[0.22em] text-gold-dark">Hakkımızda</p>
         <h1 className="mt-3 font-display text-5xl text-navy">Anılar dağılmasın diye.</h1>
         <div className="gold-divider mx-0" />

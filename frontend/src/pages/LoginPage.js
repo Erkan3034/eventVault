@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import BrandMark from '../components/BrandMark';
+import { PHOTOS } from '../components/HeroScene';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -34,18 +35,22 @@ const LoginPage = () => {
 
     return (
         <div className="grid min-h-screen lg:grid-cols-2">
-            <div className="hidden flex-col justify-between bg-navy px-12 py-16 text-cream lg:flex">
-                <BrandMark to="/" light />
-                <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Tekrar hoş geldiniz</p>
-                    <h1 className="mt-4 font-display text-5xl leading-tight">
-                        Albümleriniz<br />sizi bekliyor.
-                    </h1>
-                    <p className="mt-5 max-w-sm text-cream/60">
-                        Yüklemeleri görün, QR kodu paylaşın, anıları düzenleyin.
-                    </p>
+            <div className="relative hidden flex-col justify-between overflow-hidden bg-navy px-12 py-16 text-cream lg:flex">
+                <img src={PHOTOS.wedding} alt="" className="photo-grade absolute inset-0 h-full w-full object-cover opacity-35" />
+                <div className="absolute inset-0 bg-navy/70" />
+                <div className="relative flex h-full flex-col justify-between">
+                    <BrandMark to="/" light />
+                    <div>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Tekrar hoş geldiniz</p>
+                        <h1 className="mt-4 font-display text-5xl leading-tight">
+                            Albümleriniz<br />sizi bekliyor.
+                        </h1>
+                        <p className="mt-5 max-w-sm text-cream/70">
+                            Yüklemeleri görün, QR kodu paylaşın, anıları düzenleyin.
+                        </p>
+                    </div>
+                    <p className="text-sm text-cream/50">EventVault</p>
                 </div>
-                <p className="text-sm text-cream/40">EventVault</p>
             </div>
 
             <div className="flex items-center justify-center px-4 py-16">
