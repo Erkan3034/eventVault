@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from apps.albums.models import EventType, Album
+from apps.albums.event_catalog import EVENT_TYPES
 from apps.authentication.models import User
 
 
@@ -9,32 +10,39 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Loading initial data...')
 
-        event_types = [
-            {'name': 'Wedding', 'name_tr': 'Düğün', 'icon': 'heart', 'color': '#ff6b9d'},
-            {'name': 'Engagement', 'name_tr': 'Nişan', 'icon': 'ring', 'color': '#ff9ff3'},
-            {'name': 'Birthday', 'name_tr': 'Doğum Günü', 'icon': 'cake', 'color': '#feca57'},
-            {'name': 'Graduation', 'name_tr': 'Mezuniyet', 'icon': 'graduation-cap', 'color': '#48cae4'},
-            {'name': 'Corporate Event', 'name_tr': 'Kurumsal Etkinlik', 'icon': 'building', 'color': '#00d2d3'},
-            {'name': 'Party', 'name_tr': 'Parti', 'icon': 'party', 'color': '#54a0ff'},
-            {'name': 'Travel', 'name_tr': 'Seyahat', 'icon': 'plane', 'color': '#10b981'},
-            {'name': 'Other', 'name_tr': 'Diğer', 'icon': 'camera', 'color': '#6b7280'},
-        ]
-
-        for event_type_data in event_types:
+        for event_type_data in EVENT_TYPES:
             event_type, created = EventType.objects.get_or_create(
                 name=event_type_data['name'],
-                defaults={**event_type_data, 'is_active': True}
+                defaults={**event_type_data, 'is_active': True},
             )
             if created:
                 self.stdout.write(f'Created event type: {event_type.name_tr}')
             else:
-                updated = False
-                if not event_type.name_tr:
-                    event_type.name_tr = event_type_data['name_tr']
-                    updated = True
-                if updated:
+                changed = []
+                for field in ('name_tr', 'icon', 'color', 'sort_order'):
+                    if getattr(event_type, field) != event_type_data[field]:
+                        setattr(event_type, field, event_type_data[field])
+                        changed.append(field)
+                if not event_type.is_active:
+                    event_type.is_active = True
+                    changed.append('is_active')
+                if changed:
                     event_type.save()
-                self.stdout.write(f'Event type already exists: {event_type.name}')
+                    self.stdout.write(f'Updated event type: {event_type.name_tr}')
+                else:
+                    self.stdout.write(f'Event type already exists: {event_type.name_tr}')
+
+        for event_type_data in EVENT_TYPES:
+            canonical = EventType.objects.filter(name=event_type_data['name']).first()
+            if not canonical:
+                continue
+            duplicates = EventType.objects.filter(name=event_type_data['name_tr']).exclude(pk=canonical.pk)
+            for old in duplicates:
+                moved = Album.objects.filter(event_type=old).update(event_type=canonical)
+                self.stdout.write(
+                    f'Merged duplicate type "{old.name}" → "{canonical.name_tr}" ({moved} albums)'
+                )
+                old.delete()
 
         sample_user, created = User.objects.get_or_create(
             email='demo@eventvault.com',

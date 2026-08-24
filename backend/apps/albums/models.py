@@ -35,12 +35,22 @@ class EventType(models.Model):
         return self.name_tr or self.name
 
     def save(self, *args, **kwargs):
+        base = (
+            slugify(self.name or '', allow_unicode=False)
+            or slugify(self.name_tr or '', allow_unicode=False)
+            or 'etkinlik'
+        )
         if not self.slug:
-            self.slug = (
-                slugify(self.name, allow_unicode=True)
-                or slugify(self.name_tr or '', allow_unicode=True)
-                or 'etkinlik'
-            )
+            self.slug = base[:90]
+        original = self.slug
+        suffix = 2
+        existing = EventType.objects.all()
+        if self.pk:
+            existing = existing.exclude(pk=self.pk)
+        while existing.filter(slug=self.slug).exists():
+            extra = f'-{suffix}'
+            self.slug = f'{original[:90 - len(extra)]}{extra}'
+            suffix += 1
         super().save(*args, **kwargs)
 
 

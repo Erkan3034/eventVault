@@ -108,7 +108,7 @@ const HomePage = () => {
                             )}
                         </div>
                         <p className="mt-8 text-sm text-cream/45">
-                            Düğün · nişan · mezuniyet · doğum günü
+                            Düğün · kına · cinsiyet partisi · after party · kurumsal
                         </p>
                     </div>
                     <div className="reveal" style={{ animationDelay: '120ms' }}>
@@ -179,6 +179,9 @@ const HomePage = () => {
                             </figure>
                         ))}
                     </div>
+                    <p className="mt-8 text-center text-sm text-navy/45">
+                        Kına, after party, cinsiyet partisi, sünnet, kurumsal lansman, iftar ve daha fazlası albüm türlerinde.
+                    </p>
                 </div>
             </section>
 

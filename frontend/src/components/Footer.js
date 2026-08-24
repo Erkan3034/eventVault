@@ -9,7 +9,7 @@ const Footer = () => (
                 <div>
                     <BrandMark to="/" light compact />
                     <p className="mt-5 max-w-sm text-sm leading-relaxed text-cream/65">
-                        Etkinlik anılarınızı QR kod ile toplayın. Düğün, nişan, mezuniyet ve özel günler için sakin, güvenli bir albüm.
+                        Etkinlik anılarınızı QR kod ile toplayın. Düğün, kına, kurumsal etkinlik ve özel günler için sakin, güvenli bir albüm.
                     </p>
                 </div>
                 <div>

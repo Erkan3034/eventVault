@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -104,7 +105,7 @@ class AdminReportSerializer(serializers.ModelSerializer):
 
 
 class AdminEventTypeSerializer(serializers.ModelSerializer):
-    album_count = serializers.IntegerField(read_only=True)
+    album_count = serializers.SerializerMethodField()
 
     class Meta:
         model = EventType
@@ -113,3 +114,44 @@ class AdminEventTypeSerializer(serializers.ModelSerializer):
             'is_active', 'sort_order', 'album_count',
         )
         read_only_fields = ('id', 'slug', 'album_count')
+        extra_kwargs = {
+            'name': {'required': False, 'allow_blank': True, 'validators': []},
+            'name_tr': {'required': True, 'allow_blank': False},
+        }
+
+    def get_album_count(self, obj):
+        counted = getattr(obj, 'album_count', None)
+        if counted is not None:
+            return counted
+        return obj.albums.count()
+
+    def validate_name(self, value):
+        value = (value or '').strip()
+        if not value:
+            return value
+        qs = EventType.objects.filter(name__iexact=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('Bu etkinlik türü zaten var.')
+        return value
+
+    def validate_name_tr(self, value):
+        value = (value or '').strip()
+        if not value:
+            raise serializers.ValidationError('Türkçe ad gerekli.')
+        return value
+
+    def create(self, validated_data):
+        name_tr = validated_data.get('name_tr') or ''
+        name = (validated_data.get('name') or '').strip() or name_tr or 'Event'
+        validated_data['name'] = name
+        if not validated_data.get('sort_order'):
+            last = EventType.objects.order_by('-sort_order').values_list('sort_order', flat=True).first()
+            validated_data['sort_order'] = (last or 0) + 10
+        try:
+            return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError({
+                'name': 'Bu etkinlik türü kaydedilemedi. Aynı ad zaten kullanılıyor.',
+            })

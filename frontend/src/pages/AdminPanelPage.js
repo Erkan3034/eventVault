@@ -11,6 +11,17 @@ const unwrap = (data) => {
     return [];
 };
 
+const apiError = (error, fallback) => {
+    const data = error.response?.data;
+    if (!data) return fallback;
+    if (typeof data === 'string') return data;
+    if (data.detail) return data.detail;
+    const first = Object.values(data).find((value) => value != null);
+    if (Array.isArray(first)) return first[0];
+    if (typeof first === 'string') return first;
+    return fallback;
+};
+
 const formatDate = (value) => {
     if (!value) return '—';
     return new Date(value).toLocaleString('tr-TR');
@@ -171,13 +182,23 @@ const AdminPanelPage = () => {
 
     const saveEventType = async (event) => {
         event.preventDefault();
+        const nameTr = typeForm.name_tr.trim();
+        const name = typeForm.name.trim() || nameTr;
+        if (!nameTr) {
+            toast.error('Türkçe ad gerekli.');
+            return;
+        }
         try {
-            const res = await axios.post('/api/v1/admin/event-types/', typeForm);
-            setEventTypes((prev) => [...prev, res.data]);
+            const res = await axios.post('/api/v1/admin/event-types/', {
+                name,
+                name_tr: nameTr,
+                color: typeForm.color,
+            });
+            setEventTypes((prev) => [...prev, res.data].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)));
             setTypeForm({ name: '', name_tr: '', color: '#1A2748' });
             toast.success('Etkinlik türü eklendi.');
         } catch (error) {
-            toast.error('Tür eklenemedi.');
+            toast.error(apiError(error, 'Tür eklenemedi.'));
         }
     };
 
@@ -186,7 +207,7 @@ const AdminPanelPage = () => {
             const res = await axios.patch(`/api/v1/admin/event-types/${type.id}/`, { is_active: !type.is_active });
             setEventTypes((prev) => prev.map((item) => (item.id === type.id ? res.data : item)));
         } catch (error) {
-            toast.error('Tür güncellenemedi.');
+            toast.error(apiError(error, 'Tür güncellenemedi.'));
         }
     };
 
@@ -197,7 +218,7 @@ const AdminPanelPage = () => {
             toast.success('Etkinlik türü güncellendi.');
             loadAll();
         } catch (error) {
-            toast.error('Tür silinemedi.');
+            toast.error(apiError(error, 'Tür silinemedi.'));
         }
     };
 
@@ -428,12 +449,12 @@ const AdminPanelPage = () => {
                     <form onSubmit={saveEventType} className="card h-fit space-y-4 p-5">
                         <h3 className="font-display text-2xl text-navy">Yeni tür</h3>
                         <div>
-                            <label htmlFor="type_name" className="field-label">İngilizce ad</label>
-                            <input id="type_name" className="input" value={typeForm.name} onChange={(event) => setTypeForm({ ...typeForm, name: event.target.value })} required />
+                            <label htmlFor="type_name_tr" className="field-label">Türkçe ad</label>
+                            <input id="type_name_tr" className="input" value={typeForm.name_tr} onChange={(event) => setTypeForm({ ...typeForm, name_tr: event.target.value })} required placeholder="Kına, After Party…" />
                         </div>
                         <div>
-                            <label htmlFor="type_name_tr" className="field-label">Türkçe ad</label>
-                            <input id="type_name_tr" className="input" value={typeForm.name_tr} onChange={(event) => setTypeForm({ ...typeForm, name_tr: event.target.value })} required />
+                            <label htmlFor="type_name" className="field-label">İngilizce ad (isteğe bağlı)</label>
+                            <input id="type_name" className="input" value={typeForm.name} onChange={(event) => setTypeForm({ ...typeForm, name: event.target.value })} placeholder="Boş bırakılırsa Türkçe ad kullanılır" />
                         </div>
                         <div>
                             <label htmlFor="type_color" className="field-label">Renk</label>
