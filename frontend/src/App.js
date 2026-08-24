@@ -31,6 +31,20 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
+const StaffRoute = ({ children }) => {
+    const { isAuthenticated, loading, user } = useAuth();
+    if (loading) {
+        return <PageLoader />;
+    }
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+    if (!user || !user.is_staff) {
+        return <Navigate to="/dashboard" replace />;
+    }
+    return children;
+};
+
 const GuestUploadRedirect = () => {
     const { accessCode } = useParams();
     return <Navigate to={`/upload/${accessCode}`} replace />;
@@ -73,7 +87,7 @@ function AppLayout() {
                             />
                             <Route
                                 path="/admin"
-                                element={<ProtectedRoute><AdminPanelPage /></ProtectedRoute>}
+                                element={<StaffRoute><AdminPanelPage /></StaffRoute>}
                             />
                         </Routes>
                     </main>

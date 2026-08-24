@@ -32,6 +32,7 @@ urlpatterns = [
     path('api/v1/albums/', include('apps.albums.urls')),
     path('api/v1/uploads/', include('apps.uploads.urls')),
     path('api/v1/notifications/', include('apps.notifications.urls')),
+    path('api/v1/admin/', include('apps.administration.urls')),
 ]
 
 # Serve media files in development

@@ -42,7 +42,7 @@ class Command(BaseCommand):
                 'username': 'demo_user',
                 'first_name': 'Demo',
                 'last_name': 'User',
-                'is_staff': False,
+                'is_staff': True,
                 'is_superuser': False,
             }
         )
@@ -52,6 +52,9 @@ class Command(BaseCommand):
             sample_user.save()
             self.stdout.write('Created sample user: demo@eventvault.com (password: demo123)')
         else:
+            if not sample_user.is_staff:
+                sample_user.is_staff = True
+                sample_user.save(update_fields=['is_staff'])
             self.stdout.write('Sample user already exists: demo@eventvault.com')
 
         from apps.authentication.models import Profile

@@ -47,6 +47,9 @@ const Navbar = () => {
                         <>
                             <NavLink to="/dashboard" className={linkClass}>Albümlerim</NavLink>
                             <NavLink to="/create-album" className={linkClass}>Albüm Oluştur</NavLink>
+                            {user && user.is_staff && (
+                                <NavLink to="/admin" className={linkClass}>Admin</NavLink>
+                            )}
                         </>
                     )}
                 </div>
@@ -80,6 +83,15 @@ const Navbar = () => {
                                     >
                                         Profil
                                     </Link>
+                                    {user && user.is_staff && (
+                                        <Link
+                                            to="/admin"
+                                            onClick={() => setIsProfileOpen(false)}
+                                            className="block px-4 py-2 text-sm text-navy hover:bg-cream"
+                                        >
+                                            Admin paneli
+                                        </Link>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={handleLogout}
@@ -121,6 +133,9 @@ const Navbar = () => {
                             <>
                                 <NavLink to="/dashboard" className={linkClass} onClick={() => setIsOpen(false)}>Albümlerim</NavLink>
                                 <NavLink to="/create-album" className={linkClass} onClick={() => setIsOpen(false)}>Albüm Oluştur</NavLink>
+                                {user && user.is_staff && (
+                                    <NavLink to="/admin" className={linkClass} onClick={() => setIsOpen(false)}>Admin</NavLink>
+                                )}
                                 <NavLink to="/profile" className={linkClass} onClick={() => setIsOpen(false)}>Profil</NavLink>
                                 <button type="button" onClick={handleLogout} className="text-left text-sm text-navy/70">
                                     Çıkış Yap
