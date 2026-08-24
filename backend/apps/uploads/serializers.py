@@ -31,16 +31,23 @@ class UploadListSerializer(serializers.ModelSerializer):
     file_size_mb = serializers.ReadOnlyField()
     thumbnail_url = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
-    
+    is_liked_by_user = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Upload
         fields = (
             'id', 'original_filename', 'file_type', 'mime_type', 'file_size_mb',
             'uploader_display_name', 'caption', 'message', 'thumbnail_url', 'file_url',
-            'view_count', 'like_count', 'status', 'created_at'
+            'view_count', 'like_count', 'download_count', 'comment_count',
+            'is_liked_by_user', 'status', 'created_at'
         )
-        read_only_fields = ('id', 'file_size_mb', 'uploader_display_name', 'view_count', 'like_count', 'status', 'created_at')
-    
+        read_only_fields = (
+            'id', 'file_size_mb', 'uploader_display_name', 'view_count',
+            'like_count', 'download_count', 'comment_count', 'is_liked_by_user',
+            'status', 'created_at',
+        )
+
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
             return obj.thumbnail.url
@@ -50,6 +57,20 @@ class UploadListSerializer(serializers.ModelSerializer):
         if obj.file:
             return obj.file.url
         return None
+
+    def get_is_liked_by_user(self, obj):
+        liked_ids = self.context.get('liked_ids')
+        if liked_ids is not None:
+            return obj.id in liked_ids
+        user = self.context.get('request') and self.context['request'].user
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
+
+    def get_comment_count(self, obj):
+        if hasattr(obj, 'comment_count') and obj.comment_count is not None:
+            return obj.comment_count
+        return obj.comments.count()
 
 
 class UploadDetailSerializer(serializers.ModelSerializer):
@@ -131,26 +152,31 @@ class UploadCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         album = self.context['album']
-        upload = Upload.objects.create(album=album, **validated_data)
-        
-        # Increment album view count
+        status_value = 'pending' if album.require_approval else 'approved'
+        upload = Upload.objects.create(album=album, status=status_value, **validated_data)
+
         album.view_count += 1
         album.save(update_fields=['view_count'])
-        
+
         return upload
 
 
 class UploadCommentSerializer(serializers.ModelSerializer):
     """Serializer for UploadComment model"""
-    author_name = serializers.CharField(source='author.full_name', read_only=True)
-    
+    author_name = serializers.SerializerMethodField()
+
     class Meta:
         model = UploadComment
         fields = (
-            'id', 'upload', 'author', 'author_name', 'content', 'parent',
-            'is_approved', 'created_at', 'updated_at'
+            'id', 'author_name', 'content', 'parent',
+            'is_approved', 'created_at', 'updated_at',
         )
-        read_only_fields = ('id', 'author', 'author_name', 'is_approved', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'author_name', 'is_approved', 'created_at', 'updated_at')
+
+    def get_author_name(self, obj):
+        if obj.author:
+            return obj.author.full_name or obj.author.email
+        return 'Anonim'
 
 
 class UploadLikeSerializer(serializers.ModelSerializer):

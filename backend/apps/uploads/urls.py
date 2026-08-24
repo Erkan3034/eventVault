@@ -17,6 +17,7 @@ urlpatterns = [
     path('album/<uuid:album_id>/<uuid:upload_id>/comments/', views.UploadCommentView.as_view(), name='upload_comments'),
     path('album/<uuid:album_id>/<uuid:upload_id>/like/', views.UploadLikeView.as_view(), name='upload_like'),
     path('album/<uuid:album_id>/<uuid:upload_id>/report/', views.UploadReportView.as_view(), name='upload_report'),
+    path('album/<uuid:album_id>/<uuid:upload_id>/download/', views.upload_download, name='upload_download'),
     
     # Moderation
     path('moderate/<uuid:id>/', views.UploadModerationView.as_view(), name='upload_moderation'),

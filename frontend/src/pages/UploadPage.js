@@ -20,6 +20,7 @@ const UploadPage = () => {
     const [uploaderName, setUploaderName] = useState('');
     const [uploading, setUploading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [awaitingApproval, setAwaitingApproval] = useState(false);
     const fileInputRef = useRef();
 
     useEffect(() => {
@@ -56,15 +57,17 @@ const UploadPage = () => {
         formData.append('message', message);
         formData.append('uploader_name', uploaderName);
         try {
-            await axios.post(`/api/v1/uploads/${accessCode}/`, formData, {
+            const res = await axios.post(`/api/v1/uploads/${accessCode}/`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
+            const pending = (res.data && res.data.status === 'pending') || Boolean(album && album.require_approval);
+            setAwaitingApproval(pending);
             setSuccess(true);
             setFile(null);
             setMessage('');
             setUploaderName('');
             if (fileInputRef.current) fileInputRef.current.value = '';
-            toast.success('Dosya yüklendi.');
+            toast.success(pending ? 'Onay için gönderildi.' : 'Dosya yüklendi.');
         } catch (err) {
             const payload = err.response && err.response.data;
             const detail = payload && typeof payload === 'object'
@@ -77,7 +80,9 @@ const UploadPage = () => {
     };
 
     const settings = (album && album.settings) || {};
-    const thankYou = settings.thank_you_message || 'Anınız albüme eklendi. Teşekkürler.';
+    const thankYou = awaitingApproval
+        ? 'Yüklemeniz albüm sahibinin onayını bekliyor. Onaylandıktan sonra galeride görünür.'
+        : (settings.thank_you_message || 'Anınız albüme eklendi. Teşekkürler.');
 
     if (!album && !albumError) return <PageLoader />;
 
@@ -98,7 +103,7 @@ const UploadPage = () => {
                 <h2 className="mt-3 font-display text-5xl text-navy">Teşekkürler</h2>
                 <div className="gold-divider" />
                 <p className="text-navy/70">{thankYou}</p>
-                <button type="button" className="btn-primary mt-8" onClick={() => setSuccess(false)}>
+                <button type="button" className="btn-primary mt-8" onClick={() => { setSuccess(false); setAwaitingApproval(false); }}>
                     Yeni dosya yükle
                 </button>
             </div>
@@ -112,6 +117,9 @@ const UploadPage = () => {
             <p className="mt-3 text-navy/60">
                 {settings.welcome_message || 'Bir fotoğraf veya kısa bir not bırakın.'}
             </p>
+            {album.require_approval && (
+                <p className="mt-2 text-sm text-gold-dark">Yüklemeler albüm sahibinin onayından sonra galeride görünür.</p>
+            )}
 
             <form className="card mt-8 space-y-5 p-6 sm:p-8" onSubmit={handleSubmit}>
                 <div>
