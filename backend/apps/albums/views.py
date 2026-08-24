@@ -2,10 +2,20 @@ from rest_framework import status, generics, permissions, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 from .models import Album, EventType, AlbumCollaborator, AlbumSettings
+from .export import (
+    DRIVE_SCOPE,
+    DriveExportError,
+    build_album_zip,
+    exportable_uploads,
+    mark_album_downloaded,
+    push_album_to_drive,
+    zip_response,
+)
 from .serializers import (
     EventTypeSerializer, AlbumListSerializer, AlbumDetailSerializer,
     AlbumCreateSerializer, AlbumUpdateSerializer, AlbumQRCodeSerializer,
@@ -176,4 +186,43 @@ def user_albums_stats(request):
         'total_size_mb': round(total_bytes / (1024 * 1024), 2),
     }
     
-    return Response(stats, status=status.HTTP_200_OK) 
+    return Response(stats, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def album_export_zip(request, id):
+    album = get_object_or_404(Album, id=id, owner=request.user)
+    if not exportable_uploads(album).exists():
+        return Response({'error': 'Dışa aktarılacak dosya yok.'}, status=status.HTTP_400_BAD_REQUEST)
+    tmp, count = build_album_zip(album)
+    mark_album_downloaded(album, count)
+    return zip_response(album, tmp)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([permissions.IsAuthenticated])
+def album_export_drive(request, id):
+    album = get_object_or_404(Album, id=id, owner=request.user)
+    if request.method == 'GET':
+        client_id = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', '') or ''
+        return Response({
+            'enabled': bool(client_id),
+            'client_id': client_id,
+            'scope': DRIVE_SCOPE,
+        })
+
+    if not exportable_uploads(album).exists():
+        return Response({'error': 'Dışa aktarılacak dosya yok.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    token = (request.data.get('access_token') or '').strip()
+    if not token:
+        return Response({'error': 'Google hesabı bağlanmadı.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        result = push_album_to_drive(album, token)
+    except DriveExportError as exc:
+        status_code = exc.status_code if exc.status_code >= 400 else status.HTTP_400_BAD_REQUEST
+        return Response({'error': exc.message}, status=status_code)
+
+    return Response(result, status=status.HTTP_200_OK) 

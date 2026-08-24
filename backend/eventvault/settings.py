@@ -221,6 +221,7 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@mirra.com.tr'
 # ─────────────────────────────────────────────────────────────
 MIRRA_APP_URL = config('MIRRA_APP_URL', default='http://localhost:3000')
 MIRRA_APP_NAME = 'Mirra'
+GOOGLE_OAUTH_CLIENT_ID = config('GOOGLE_OAUTH_CLIENT_ID', default='')
 
 # File upload limits
 MAX_UPLOAD_SIZE_IMAGE = 20 * 1024 * 1024   # 20MB (before WebP conversion)

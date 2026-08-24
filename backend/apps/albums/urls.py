@@ -12,6 +12,8 @@ urlpatterns = [
     path('<uuid:id>/', views.AlbumDetailView.as_view(), name='album_detail'),
     path('<uuid:id>/qr/', views.AlbumQRCodeView.as_view(), name='album_qr'),
     path('<uuid:id>/stats/', views.AlbumStatsView.as_view(), name='album_stats'),
+    path('<uuid:id>/export/zip/', views.album_export_zip, name='album_export_zip'),
+    path('<uuid:id>/export/drive/', views.album_export_drive, name='album_export_drive'),
     path('<uuid:id>/activate/', views.album_activate, name='album_activate'),
     path('<uuid:id>/deactivate/', views.album_deactivate, name='album_deactivate'),
     

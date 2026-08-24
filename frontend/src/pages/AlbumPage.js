@@ -7,9 +7,11 @@ import {
     HeartIcon as HeartOutline,
     ChatBubbleLeftIcon,
     ArrowDownTrayIcon,
+    CloudArrowUpIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import PageLoader from '../components/PageLoader';
+import { loadGoogleIdentity, requestDriveAccessToken } from '../utils/googleDrive';
 
 const statusLabel = (status) => {
     switch (status) {
@@ -86,6 +88,7 @@ const AlbumPage = () => {
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState('');
     const [commentsLoading, setCommentsLoading] = useState(false);
+    const [exporting, setExporting] = useState('');
 
     useEffect(() => {
         const load = async () => {
@@ -272,6 +275,75 @@ const AlbumPage = () => {
         }
     };
 
+    const exportError = async (error, fallback) => {
+        const data = error.response && error.response.data;
+        if (data instanceof Blob) {
+            try {
+                const parsed = JSON.parse(await data.text());
+                return parsed.error || parsed.detail || fallback;
+            } catch (parseError) {
+                return fallback;
+            }
+        }
+        if (data && data.error) return data.error;
+        if (data && data.detail) return data.detail;
+        return fallback;
+    };
+
+    const downloadAlbumZip = async () => {
+        setExporting('zip');
+        try {
+            const res = await axios.get(`/api/v1/albums/${id}/export/zip/`, {
+                responseType: 'blob',
+                timeout: 600000,
+            });
+            const disposition = res.headers['content-disposition'] || '';
+            const utfMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+            const plainMatch = disposition.match(/filename="?([^"]+)"?/i);
+            const filename = decodeURIComponent((utfMatch && utfMatch[1]) || (plainMatch && plainMatch[1]) || 'album.zip');
+            const url = window.URL.createObjectURL(res.data);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success('ZIP indirildi.');
+        } catch (error) {
+            toast.error(await exportError(error, 'ZIP hazırlanamadı.'));
+        } finally {
+            setExporting('');
+        }
+    };
+
+    const exportAlbumToDrive = async () => {
+        setExporting('drive');
+        try {
+            const configRes = await axios.get(`/api/v1/albums/${id}/export/drive/`);
+            const clientId = configRes.data.client_id || process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
+            if (!clientId) {
+                toast.error('Google Drive için GOOGLE_OAUTH_CLIENT_ID tanımlayın. Şimdilik ZIP indirebilirsiniz.');
+                return;
+            }
+            await loadGoogleIdentity();
+            const accessToken = await requestDriveAccessToken(clientId, configRes.data.scope);
+            const res = await axios.post(
+                `/api/v1/albums/${id}/export/drive/`,
+                { access_token: accessToken },
+                { timeout: 600000 },
+            );
+            toast.success(`${res.data.uploaded || 0} dosya Google Drive'a gönderildi.`);
+            if (res.data.folder_url) {
+                window.open(res.data.folder_url, '_blank', 'noopener,noreferrer');
+            }
+        } catch (error) {
+            toast.error(error.message && !error.response ? error.message : await exportError(error, 'Google Drive gönderilemedi.'));
+        } finally {
+            setExporting('');
+        }
+    };
+
     const submitComment = async (event) => {
         event.preventDefault();
         if (!activeUpload || !commentText.trim()) return;
@@ -397,6 +469,37 @@ const AlbumPage = () => {
                         </button>
                     </div>
                 )}
+
+                <div className="mt-10 flex flex-col gap-4 rounded-2xl border border-cream-dark bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="font-display text-2xl text-navy">Dışa aktar</p>
+                        <p className="mt-1 text-sm text-navy/50">
+                            {album.require_approval
+                                ? 'Onaylı dosyalar ZIP veya Google Drive klasörü olarak çıkarılır. Onay bekleyenler dahil edilmez.'
+                                : 'Reddedilmeyen dosyalar ZIP veya Google Drive klasörü olarak çıkarılır.'}
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            disabled={Boolean(exporting)}
+                            onClick={downloadAlbumZip}
+                            className="btn-secondary py-2.5 text-sm disabled:opacity-50"
+                        >
+                            <ArrowDownTrayIcon className="h-4 w-4" />
+                            {exporting === 'zip' ? 'ZIP hazırlanıyor…' : 'ZIP indir'}
+                        </button>
+                        <button
+                            type="button"
+                            disabled={Boolean(exporting)}
+                            onClick={exportAlbumToDrive}
+                            className="btn-primary py-2.5 text-sm disabled:opacity-50"
+                        >
+                            <CloudArrowUpIcon className="h-4 w-4" />
+                            {exporting === 'drive' ? 'Drive\'a gönderiliyor…' : 'Google Drive'}
+                        </button>
+                    </div>
+                </div>
 
                 <div className="mt-14">
                     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
